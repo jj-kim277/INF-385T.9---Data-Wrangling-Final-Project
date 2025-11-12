@@ -1,0 +1,211 @@
+---
+title: "Final Project"
+format: html
+editor: visual
+---
+
+INF 385T.9 - Data Wrangling Final Project: Does Positive Pop Music Portend Positive Attitudes?
+
+Investigation: Do countries with more upbeat number-one songs on pop music charts havehigher overall levels of happiness?
+
+We will be working with data harvested from Spotify about popular music, Billboard ChartData from countries across the world, and the World Happiness Report to determine whethercountries that report higher happiness levels also listen to more upbeat music. Datasetsavailable online list metadata for thousands of popular songs, including songs that have toppedthe charts in countries as far flung as Turkey, Brazil, and Japan.
+
+By filtering large metadatasets of music to find matches with songs that hit number onearound the world, we hope to find trends among popular songs in each nation. We plan to lookat factors such as tempo, danceability, and energy to determine a song’ “upbeat-ness,” usingBillboard charts to determine the average “upbeatness” of popular songs in a given country, andthen visualizing the relative upbeatness of popular music in a country with Life EvaluationScores from the World Happiness Report to determine if there is a correlation between theupbeatness of popular music in a given nation and that nation’s happiness.
+
+While we hoped to use Spotify’s API to harvest up-to-date metadata about currentlypopular songs in various locales, Spotify unfortunately removed this feature from their API lastfall. However, ample archived datasets of thousands of songs exist on Kaggle and Github.Between these datasets, Billboard Chart data,, and the World Happiness Report, we hope touncover answers to the following questions:
+
+Do happier countries listen to more upbeat, danceable music?
+
+If so, will these trends appear regardless of socioeconomic factors like GDP per capita, or will weneed to control for wealth and human development?
+
+Have these trends changed since 2023, when the analytic data was collected?Or do the happier countries’ trend remain the same?
+
+R Tidyverse
+
+Load tidyverse and other analytic packages
+
+{r}
+
+library(tidyverse)
+
+Import Dataset 1
+
+Import Dataset 2
+
+Import & Wrangle Dataset 3 - World Data 2023 (Kaggle)
+
+{r}
+
+## Import world_data_2023
+world_data_2023
+
+{r}
+
+## Select County and Abbreviation columns only
+## and assign it to a new table
+abbreviation_table <- world_data_2023 |>
+                        select(Country, Abbreviation)
+
+abbreviation_table
+
+Import & Wrangle Dataset 4 - Weekly Chart of October 16, 2025 (Kworb)
+
+{r}
+
+## Import weekly chart of Ireland and remove all columns 
+## except for the Artist.and.Title column.
+## Separate artist and song title from the Artist.and.Title column.
+ireland_2025 <- `10_16_25_ireland` |>
+                  select(Artist.and.Title) |>
+                  separate_wider_delim(Artist.and.Title, 
+                                       delim = "-",
+                                       names = c("Artist", "Title"),
+                                       too_many = "merge")
+ireland_2025
+
+{r}
+
+## Import weekly chart of New Zealand and remove all columns 
+## except for the Artist.and.Title column.
+## Separate artist and song title from the Artist.and.Title column.
+new_zealand_2025 <- `10_16_25_new_zealand` |>
+                      select(Artist.and.Title) |>
+                      separate_wider_delim(Artist.and.Title, 
+                                           delim = "-",
+                                           names = c("Artist", "Title"),
+                                           too_many = "merge")  
+new_zealand_2025
+
+{r}
+
+## Import weekly chart of South Korea and remove all columns 
+## except for the Artist.and.Title column.
+## Separate artist and song title from the Artist.and.Title column.
+south_korea_2025 <- `10_16_25_korea` |>
+                      select(Artist.and.Title) |>
+                      separate_wider_delim(Artist.and.Title, 
+                                           delim = "-",
+                                           names = c("Artist", "Title"),
+                                           too_many = "merge")  
+south_korea_2025
+
+{r}
+
+## Import weekly chart of USA and remove all columns 
+## except for the Artist.and.Title column.
+## Separate artist and song title from the Artist.and.Title column.
+usa_2025 <- `10_16_25_usa` |>
+               select(Artist.and.Title) |>
+               separate_wider_delim(Artist.and.Title, 
+                                    delim = "-",
+                                    names = c("Artist", "Title"),
+                                    too_many = "merge")  
+usa_2025
+
+SQL
+
+Establish connection with duckdb
+
+{r}
+
+library(DBI)
+library(duckdb)
+options(duckdb.enable_rstudio_connection_pane=TRUE)
+
+drv <- duckdb()
+con <- dbConnect(drv)
+
+Import & Wrangle Dataset 1
+
+Import & Wrangle Dataset 2
+
+Import & Wrangle Dataset 3
+
+{r}
+
+## Import world_data_2023
+dbWriteTable(con, "world_data_2023", `world_data_2023`, overwrite = TRUE)
+
+{sql}
+#| connection: con      
+#| echo: true
+
+-- Select County and Abbreviation columns only
+
+SELECT Country, Abbreviation
+FROM world_data_2023
+
+Import & Wrangle Dataset 4
+
+Ireland Dataset
+
+{r}
+
+## Import 10_16_25_ireland
+dbWriteTable(con, "ireland_2025_sql", `10_16_25_ireland`, overwrite = TRUE)
+
+{sql}
+#| connection: con      
+#| echo: true
+
+-- Import weekly chart of Ireland and remove all columns 
+-- except for the Artist.and.Title column.
+-- Separate artist and song title from the Artist.and.Title column.
+SELECT STRING_SPLIT("Artist.and.Title", '-')[1] AS Artist,
+       STRING_SPLIT("Artist.and.Title", '-')[2] AS Title
+FROM ireland_2025_sql
+
+New Zealand Dataset
+
+{r}
+
+## Import 10_16_25_new_zealand
+dbWriteTable(con, "new_zealand_2025_sql", `10_16_25_new_zealand`, overwrite = TRUE)
+
+{sql}
+#| connection: con      
+#| echo: true
+
+-- Import weekly chart of New Zealand and remove all columns 
+-- except for the Artist.and.Title column.
+-- Separate artist and song title from the Artist.and.Title column.
+SELECT STRING_SPLIT("Artist.and.Title", '-')[1] AS Artist,
+       STRING_SPLIT("Artist.and.Title", '-')[2] AS Title
+FROM new_zealand_2025_sql
+
+South Korea Dataset
+
+{r}
+
+## Import 10_16_25_korea
+dbWriteTable(con, "south_korea_2025_sql", `10_16_25_korea`, overwrite = TRUE)
+
+{sql}
+#| connection: con      
+#| echo: true
+
+-- Import weekly chart of South Korea and remove all columns 
+-- except for the Artist.and.Title column.
+-- Separate artist and song title from the Artist.and.Title column.
+SELECT STRING_SPLIT("Artist.and.Title", '-')[1] AS Artist,
+       STRING_SPLIT("Artist.and.Title", '-')[2] AS Title
+FROM south_korea_2025_sql
+
+USA Dataset
+
+{r}
+
+## Import 10_16_25_usa
+dbWriteTable(con, "usa_2025_sql", `10_16_25_usa`, overwrite = TRUE)
+
+{sql}
+#| connection: con      
+#| echo: true
+
+-- Import weekly chart of USA and remove all columns 
+-- except for the Artist.and.Title column.
+-- Separate artist and song title from the Artist.and.Title column.
+SELECT STRING_SPLIT("Artist.and.Title", '-')[1] AS Artist,
+       STRING_SPLIT("Artist.and.Title", '-')[2] AS Title
+FROM usa_2025_sql
+
