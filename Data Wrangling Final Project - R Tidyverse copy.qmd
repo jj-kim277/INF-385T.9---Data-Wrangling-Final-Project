@@ -1,0 +1,818 @@
+---
+title: "Final Project"
+format: html
+editor: visual
+---
+
+## INF 385T.9 - Data Wrangling Final Project: Does Positive Pop Music Portend Positive Attitudes?
+
+Investigation: Do countries with more upbeat number-one songs on pop music charts have\
+higher overall levels of happiness?\
+
+We will be working with data harvested from Spotify about popular music, Billboard Chart\
+Data from countries across the world, and the World Happiness Report to determine whether\
+countries that report higher happiness levels also listen to more upbeat music. Datasets\
+available online list metadata for thousands of popular songs, including songs that have topped\
+the charts in countries as far flung as Turkey, Brazil, and Japan.\
+
+By filtering large metadatasets of music to find matches with songs that hit number one\
+around the world, we hope to find trends among popular songs in each nation. We plan to look\
+at factors such as tempo, danceability, and energy to determine a song’ “upbeat-ness,” using\
+Billboard charts to determine the average “upbeatness” of popular songs in a given country, and\
+then visualizing the relative upbeatness of popular music in a country with Life Evaluation\
+Scores from the World Happiness Report to determine if there is a correlation between the\
+upbeatness of popular music in a given nation and that nation’s happiness.\
+
+While we hoped to use Spotify’s API to harvest up-to-date metadata about currently\
+popular songs in various locales, Spotify unfortunately removed this feature from their API last\
+fall. However, ample archived datasets of thousands of songs exist on Kaggle and Github.\
+Between these datasets, Billboard Chart data,, and the World Happiness Report, we hope to\
+uncover answers to the following questions:\
+
+1.  Do happier countries listen to more upbeat, danceable music?
+
+2.  If so, will these trends appear regardless of socioeconomic factors like GDP per capita, or will we\
+    need to control for wealth and human development?
+
+3.  Have these trends changed since 2023, when the analytic data was collected?\
+    Or do the happier countries’ trend remain the same?
+
+## R Tidyverse
+
+### Load tidyverse and other analytic packages
+
+```{r}
+
+library(tidyverse)
+```
+
+### Import Dataset 1 - World Happiness Report
+
+<https://dplyr.tidyverse.org/reference/rename.html>
+
+<https://dplyr.tidyverse.org/reference/select.html>
+
+```{r}
+
+## Import World Happiness Report - 2023
+WHR23
+```
+
+```{r}
+
+## Remove Standard.error.of.ladder.score, upperwhiser, and lowerwhisker columns
+Happiness_report_23 <- WHR23 |>
+                        select(c(Country.name,
+                                 Ladder.score, 
+                                 Logged.GDP.per.capita, 
+                                 Social.support,
+                                 Healthy.life.expectancy,
+                                 Freedom.to.make.life.choices,
+                                 Generosity))
+
+Happiness_report_23
+```
+
+```{r}
+
+## Rename columns for more intuitive understanding
+happiness_report_23 <- Happiness_report_23 |>
+                        rename(c(country_name = Country.name,
+                                 happiness_score = Ladder.score,
+                                 gdp_wellbeing = Logged.GDP.per.capita,
+                                 social_support = Social.support,
+                                 life_exp = Healthy.life.expectancy,
+                                 freedom = Freedom.to.make.life.choices,
+                                 generosity = Generosity))
+
+happiness_report_23
+```
+
+### Import Dataset 2 - Spotify Global Top 50 Song Data (Kaggle)
+
+<https://tidyr.tidyverse.org/reference/separate_wider_delim.html>
+
+<https://dplyr.tidyverse.org/reference/relocate.html>
+
+```{r}
+
+## Import global top spotify song dataset
+universal_top_spotify_songs_2023
+```
+
+```{r}
+
+## Select name, artists, country, danceability ,energy, loudness, liveness, valence, and tempo
+## Rename name column to title
+spotify_2023 <- universal_top_spotify_songs_2023 |>
+                  select(c(name, 
+                           artists, 
+                           country,
+                           snapshot_date,
+                           danceability,
+                           energy, 
+                           loudness, 
+                           liveness,
+                           valence,
+                           tempo))
+
+spotify_2023 <- spotify_2023 |>
+                  rename(title = name)
+
+spotify_2023
+```
+
+```{r}
+
+## Only keep the first artist
+## Remove any white space before and after string
+## Change both columns to all lowercase for easier matching
+global_spotify_2023 <- spotify_2023 |>
+                          mutate(artists = str_to_lower(str_trim(as.character(artists))), 
+                                 title = str_to_lower(str_trim(title))) |>
+                          mutate(artist = word(artists, 1, sep = ",")) |>
+                          select(-artists) |>
+                          relocate(artist, .after = title)
+                    
+                    
+global_spotify_2023                    
+```
+
+### Import & Wrangle Dataset 3 - World Data 2023 (Kaggle)
+
+```{r}
+
+## Import world_data_2023
+world_data_2023
+```
+
+```{r}
+
+## Select County and Abbreviation columns only
+## and assign it to a new table
+abbreviation_table <- world_data_2023 |>
+                        select(Country, Abbreviation)
+
+abbreviation_table
+```
+
+### Import & Wrangle Dataset 4 - Weekly Charts of October 16, 2025 (Kworb)
+
+<https://stringr.tidyverse.org/reference/case.html>
+
+<https://stringr.tidyverse.org/reference/word.html>
+
+<https://stringr.tidyverse.org/reference/str_trim.html>
+
+#### Ireland Dataset
+
+```{r}
+
+## Import weekly chart of Ireland and remove all columns 
+## except for the Artist.and.Title column.
+## Separate artist and song title from the Artist.and.Title column.
+## Only keep the first artist
+## Remove any white space before and after string
+## Change both columns to all lowercase for easier matching
+ireland_2025 <- `10_16_25_ireland` |>
+                  select(Artist.and.Title) |>
+                  separate_wider_delim(Artist.and.Title, 
+                                       delim = "-",
+                                       names = c("Artist", "Title"),
+                                       too_many = "merge") |>
+                  mutate(Artist = word(Artist, 1, sep = ",")) |>
+                  mutate(Artist = str_to_lower(str_trim(Artist)),
+                         Title = str_to_lower(str_trim(Title)))
+
+ireland_2025
+```
+
+#### New Zealand Dataset
+
+```{r}
+
+## Import weekly chart of New Zealand and remove all columns 
+## except for the Artist.and.Title column.
+## Separate artist and song title from the Artist.and.Title column
+## Only keep the first artist
+## Remove any white space before and after string
+## Change both columns to all lowercase for easier matching
+new_zealand_2025 <- `10_16_25_new_zealand` |>
+                      select(Artist.and.Title) |>
+                      separate_wider_delim(Artist.and.Title, 
+                                           delim = "-",
+                                           names = c("Artist", "Title"),
+                                           too_many = "merge") |>
+                      mutate(Artist = word(Artist, 1, sep = ",")) |>
+                      mutate(Artist = str_to_lower(str_trim(Artist)),
+                             Title = str_to_lower(str_trim(Title))) 
+
+new_zealand_2025
+```
+
+#### South Korea Dataset
+
+```{r}
+
+## Import weekly chart of South Korea and remove all columns 
+## except for the Artist.and.Title column
+## Separate artist and song title from the Artist.and.Title column
+## Only keep the first artist
+## Remove any white space before and after string
+## Change both columns to all lowercase for easier matching
+south_korea_2025 <- `10_16_25_korea` |>
+                      select(Artist.and.Title) |>
+                      separate_wider_delim(Artist.and.Title, 
+                                           delim = "-",
+                                           names = c("Artist", "Title"),
+                                           too_many = "merge") |>
+                      mutate(Artist = word(Artist, 1, sep = ",")) |>
+                      mutate(Artist = str_to_lower(str_trim(Artist)),
+                             Title = str_to_lower(str_trim(Title)))  
+
+south_korea_2025
+```
+
+#### USA Dataset
+
+```{r}
+
+## Import weekly chart of USA and remove all columns 
+## except for the Artist.and.Title column
+## Separate artist and song title from the Artist.and.Title column
+## Only keep the first artist
+## Remove any white space before and after string
+## Change both columns to all lowercase for easier matching
+usa_2025 <- `10_16_25_usa` |>
+               select(Artist.and.Title) |>
+               separate_wider_delim(Artist.and.Title, 
+                                    delim = "-",
+                                    names = c("Artist", "Title"),
+                                    too_many = "merge") |>
+                mutate(Artist = word(Artist, 1, sep = ",")) |>
+                mutate(Artist = str_to_lower(str_trim(Artist)),
+                       Title = str_to_lower(str_trim(Title))) 
+
+usa_2025
+```
+
+### Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
+
+This dataset was last updated on June 11, 2025.
+
+<https://readr.tidyverse.org/reference/type_convert.html>
+
+```{r}
+
+## Import the Universal Top Spotify Songs dataset
+## Keep following columns only:
+## name, artists, danceability, energy, loudness, liveness, tempo
+## Only keep the first artist
+## Change both columns to all lowercase for easier matching
+universal_spotify <- universal_top_spotify_songs |>
+                      select(name, artists, danceability, energy, loudness, liveness, tempo)|>
+                      rename(title = name)
+    
+universal_spotify
+```
+
+```{r}
+
+## Wrangle further:
+## Split the artists column and only keep the first artist
+## Change all columns to lowercase for easier joins with other datasets
+spotify_2025_R <- universal_spotify |>
+                    mutate(artists = str_to_lower(str_trim(as.character(artists))), 
+                             title = str_to_lower(str_trim(title))) |>
+                    mutate(artist = word(artists, 1, sep = ",")) |>
+                    select(-artists) |>
+                    relocate(artist, .after = title)
+
+spotify_2025_R
+```
+
+### Combine dataset 2 and 3 - replace country abbreviation with its full name
+
+```{r}
+
+## Match spotify's country abbreviation with abbreviation table's abbreviation
+## Drop abbreviation column
+## Rearrange country column to the front
+## Remove any unmatched rows
+spotify_global_2023_matched <- global_spotify_2023 |>
+                                left_join(abbreviation_table,
+                                          join_by(country == Abbreviation)) |>
+                                select(!country) |>
+                                drop_na() |>
+                                relocate(Country, everything())
+                                
+
+spotify_global_2023_matched
+```
+
+### Aggregate danceability, energy, loudness, liveness, valence, and tempo by Country for 2023 Spotify Dataset
+
+```{r}
+
+## Calculate averages of spotify_global_2023_matched 
+## dataset by Country
+spotify_global_2023_avg <- spotify_global_2023_matched |>
+                            group_by(Country) |>
+                            summarise(danceability_avg = mean(danceability),
+                                      energy_avg = mean(energy),
+                                      loudness_avg = mean(loudness),
+                                      liveness_avg = mean(liveness),
+                                      valence_avg = mean(valence),
+                                      tempo_avg = mean(tempo))
+
+spotify_global_2023_avg
+```
+
+### Join Dataset 5 to Each Country's Dataset for 2025 Analysis
+
+<https://dplyr.tidyverse.org/reference/distinct.html>
+
+#### Ireland Dataset
+
+```{r}
+
+## Join Ireland dataframe and updated Spotify dataframe
+## Left join to keep all the rows of left dataframe
+ireland_2025_matched_r <- ireland_2025 |>
+                            left_join(spotify_2025_R,
+                                      join_by(Artist == artist,
+                                              Title == title))
+ireland_2025_matched_r
+```
+
+```{r}
+
+## Remove duplicate 
+## Drop title and artist columns from spotify_2025_py_cleaned
+## Drop duplicate rows and songs with no analytic data
+ireland_2025_matched_r_cleaned <- ireland_2025_matched_r |>
+                                    distinct(Artist, Title, .keep_all = TRUE) |>
+                                    drop_na(danceability)
+
+ireland_2025_matched_r_cleaned
+```
+
+```{r}
+
+## Calculate average for each column
+## Will be used later for 2023 and 2025 comparison
+ireland_spotify_2025_avg <- ireland_2025_matched_r_cleaned |>
+                              summarise(danceability_avg = mean(danceability),
+                                        energy_avg = mean(energy),
+                                        loudness_avg = mean(loudness),
+                                        liveness_avg = mean(liveness),
+                                        tempo_avg = mean(tempo)) |>
+                              mutate(Country = "Ireland") |>
+                              relocate(Country, everything())
+
+ireland_spotify_2025_avg
+```
+
+#### New Zealand Dataset
+
+```{r}
+
+## Join New Zealand dataframe and updated Spotify dataframe
+## Left join to keep all the rows of left dataframe
+new_zealand_2025_matched_r <- new_zealand_2025 |>
+                                left_join(spotify_2025_R,
+                                          join_by(Artist == artist,
+                                                  Title == title))
+new_zealand_2025_matched_r
+```
+
+```{r}
+
+## Remove duplicate 
+## Drop title and artist columns from spotify_2025_py_cleaned
+## Drop duplicate rows and songs with no analytic data
+new_zealand_2025_matched_r_cleaned <- new_zealand_2025_matched_r |>
+                                        distinct(Artist, Title, .keep_all = TRUE) |>
+                                        drop_na(danceability)
+
+new_zealand_2025_matched_r_cleaned
+```
+
+```{r}
+
+## Calculate average for each column
+## Will be used later for 2023 and 2025 comparison
+new_zealand_spotify_2025_avg <- new_zealand_2025_matched_r_cleaned |>
+                                  summarise(danceability_avg = mean(danceability),
+                                            energy_avg = mean(energy),
+                                            loudness_avg = mean(loudness),
+                                            liveness_avg = mean(liveness),
+                                            tempo_avg = mean(tempo)) |>
+                                  mutate(Country = "New Zealand",
+                                         year = 2025) |>
+                                  relocate(Country, year, everything())
+
+new_zealand_spotify_2025_avg
+```
+
+#### South Korea Dataset
+
+```{r}
+
+## Join South Korea dataframe and updated Spotify dataframe
+## Left join to keep all the rows of left dataframe
+south_korea_2025_matched_r <- south_korea_2025 |>
+                                left_join(spotify_2025_R,
+                                          join_by(Artist == artist,
+                                                  Title == title))
+south_korea_2025_matched_r
+```
+
+```{r}
+
+## Remove duplicate 
+## Drop title and artist columns from spotify_2025_py_cleaned
+## Drop duplicate rows and songs with no analytic data
+south_korea_2025_matched_r_cleaned <- south_korea_2025_matched_r |>
+                                        distinct(Artist, Title, .keep_all = TRUE) |>
+                                        drop_na(danceability)
+
+south_korea_2025_matched_r_cleaned
+```
+
+```{r}
+
+## Calculate average for each column
+## Will be used later for 2023 and 2025 comparison
+south_korea_spotify_2025_avg <- south_korea_2025_matched_r_cleaned |>
+                                  summarise(danceability_avg = mean(danceability),
+                                            energy_avg = mean(energy),
+                                            loudness_avg = mean(loudness),
+                                            liveness_avg = mean(liveness),
+                                            tempo_avg = mean(tempo)) |>
+                                  mutate(Country = "South Korea",
+                                         year = 2025) |>
+                                  relocate(Country, year, everything())
+
+south_korea_spotify_2025_avg
+```
+
+#### USA Dataset
+
+```{r}
+
+## Join USA dataframe and updated Spotify dataframe
+## Left join to keep all the rows of left dataframe
+usa_2025_matched_r <- usa_2025 |>
+                        left_join(spotify_2025_R,
+                                  join_by(Artist == artist,
+                                          Title == title))
+usa_2025_matched_r
+```
+
+```{r}
+
+## Remove duplicate 
+## Drop title and artist columns from spotify_2025_py_cleaned
+## Drop duplicate rows and songs with no analytic data
+usa_2025_matched_r_cleaned <- usa_2025_matched_r |>
+                                        distinct(Artist, Title, .keep_all = TRUE) |>
+                                        drop_na(danceability)
+
+usa_2025_matched_r_cleaned
+```
+
+```{r}
+
+## Calculate average for each column
+## Will be used later for 2023 and 2025 comparison
+usa_spotify_2025_avg <- usa_2025_matched_r_cleaned |>
+                          summarise(danceability_avg = mean(danceability),
+                                    energy_avg = mean(energy),
+                                    loudness_avg = mean(loudness),
+                                    liveness_avg = mean(liveness),
+                                    tempo_avg = mean(tempo)) |>
+                          mutate(Country = "United States",
+                                 year = 2025) |>
+                          relocate(Country, year, everything())
+
+usa_spotify_2025_avg
+```
+
+### Correlation Studies
+
+<https://www.geeksforgeeks.org/r-language/how-to-plot-a-correlation-matrix-into-a-graph-using-r/>
+
+<https://www.geeksforgeeks.org/r-language/correlation-matrix-in-r-programming/>
+
+<https://r-charts.com/correlation/heat-map-ggplot2/>
+
+<https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html>
+
+```{r}
+
+## Import libraries for correlation matrix
+library(ggplot2)
+library(corrplot)
+library(ggcorrplot)
+library(PerformanceAnalytics)
+library(reshape2)
+```
+
+```{r}
+
+## Combine aggregated Spotify dataset with happiness report
+## Drop any countrys with no happiness score
+happiness_spotify_2023 <- spotify_global_2023_avg |>
+                                left_join(happiness_report_23, 
+                                join_by(Country == country_name))|>
+                                drop_na()
+
+happiness_spotify_2023
+```
+
+```{r}
+## Remove Country column for correlation analysis
+happiness_spotify_2023_cleaned <- happiness_spotify_2023 |>
+                                        select(!Country)
+
+happiness_spotify_2023_cleaned
+```
+
+```{r}
+
+## Calculate Correlation Matrix
+cor_matrix_happiness_spotify_23 <- cor(happiness_spotify_2023_cleaned, use = "complete.obs")
+
+## Melt the matrix for readability
+melted_matrix <- melt(cor_matrix_happiness_spotify_23)
+melted_matrix
+```
+
+```{r}
+
+## Visualize correlation matrix as a color chart with correlation values
+## Adding values to the ggplot below made the table extremely crowded
+## Thus, separate corrplot was created for correlation values
+corrplot(cor_matrix_happiness_spotify_23, 
+         method = "number",
+         tl.col = "black",
+         tl.cex = 0.6,
+         col.lim = c(-1, 1),
+         number.cex = 0.5,
+         col = COL2('RdBu', n = 200))
+```
+
+```{r}
+
+melted_cor_matrix <- melt(cor_matrix_happiness_spotify_23)
+
+# Plot the correlation matrix using ggplot2
+ggplot(data = melted_cor_matrix, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                   size = 12, hjust = 1)) +
+  coord_fixed()
+```
+
+## Correlation Studies for Top Happiness Score Countries
+
+```{r}
+
+## Left_join top_happiness_score_23 with spotify_global_2023_avg
+top_happiness_score_spotify_23 <- happiness_spotify_2023 |>
+                                    arrange(desc(happiness_score)) |>
+                                    slice_head(n = 10)
+                                    
+
+top_happiness_score_spotify_23
+```
+
+```{r}
+
+## Remove Country column for correlation study
+top_happiness_countries_23 <- top_happiness_score_spotify_23 |>
+                                select(!Country)
+
+
+## Find correlation for Finland data
+## Melt the correlation table for ggplot
+top_happiness_countries_23_corr <- cor(top_happiness_countries_23)
+
+top_happiness_countries_23_corr_melt <- melt(top_happiness_countries_23_corr)
+
+top_happiness_countries_23_corr_melt
+```
+
+```{r}
+
+ggplot(data = top_happiness_countries_23_corr_melt, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "red", 
+                       high = "blue", 
+                       mid = "white", 
+                       midpoint = 0, 
+                       limit = c(-1,1), 
+                       space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, 
+                                   hjust = 1, 
+                                   size = 9)) +
+  coord_fixed()
+```
+
+```{r}
+
+## Visualize correlation matrix as a color chart with correlation values
+corrplot(top_happiness_countries_23_corr,
+         method = "number",
+         tl.col = "black",
+         tl.cex = 0.6,
+         number.cex = 0.5,
+         col = COL2('RdBu', n = 200))
+```
+
+## Correlation Studies for Lowest Happiness Score Countries
+
+```{r}
+
+## Left_join top_happiness_score_23 with spotify_global_2023_avg
+bottom_happiness_score_spotify_23 <- happiness_spotify_2023 |>
+                                      arrange(happiness_score) |>
+                                      slice_head(n = 10)
+
+bottom_happiness_score_spotify_23
+```
+
+```{r}
+
+## Remove Country column for correlation study
+bot_happiness_countries_23 <- bottom_happiness_score_spotify_23 |>
+                                select(!Country)
+
+
+## Find correlation for Finland data
+## Melt the correlation table for ggplot
+bot_happiness_countries_23_corr <- cor(bot_happiness_countries_23)
+
+bot_happiness_countries_23_corr_melt <- melt(bot_happiness_countries_23_corr)
+
+bot_happiness_countries_23_corr_melt
+```
+
+```{r}
+
+## Visualize correlation  as a heatmap 
+ggplot(data = bot_happiness_countries_23_corr_melt, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "red", 
+                       high = "blue", 
+                       mid = "white", 
+                       midpoint = 0, 
+                       limit = c(-1,1), 
+                       space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, 
+                                   hjust = 1, 
+                                   size = 9)) +
+  coord_fixed()
+```
+
+```{r}
+
+## Visualize correlation as a correlation values chart 
+corrplot(bot_happiness_countries_23_corr,
+         method = "number",
+         tl.col = "black",
+         tl.cex = 0.6,
+         number.cex = 0.5,
+         col = COL2('RdBu', n = 200))
+```
+
+## Comparing 2023 and 2025 Spotify Dataset
+
+Since 2025 Happiness Report is not available yet, we will compare the average of music analytic components and note if theres any changes.
+
+<https://dplyr.tidyverse.org/reference/bind_rows.html>
+
+<https://stackoverflow.com/questions/30219908/change-row-text-using-dplyr?utm_source=chatgpt.com>
+
+<https://www.r-bloggers.com/2016/09/reshape-r-package-reshape2-melt-and-cast/?utm_source=chatgpt.com>
+
+### Ireland
+
+```{r}
+
+## Combine 2023 and 2025 Ireland spotify data
+ireland_2023 <- filter(spotify_global_2023_avg,
+                       Country == "Ireland")
+ireland_2023
+```
+
+```{r}
+
+## Create scatter plot for 2023 and 2025 Ireland data
+
+```
+
+### New Zealand
+
+```{r}
+
+## Filter 2023 New Zealand spotify data
+## Mutate Country column so that it is now New Zealand 2023
+new_zealand_2023 <- filter(spotify_global_2023_avg,
+                           Country == "New Zealand") |>
+                    mutate(year = 2023)
+                            
+new_zealand_2023
+```
+
+```{r}
+
+## Concat 2023 and 2025 New Zealand data into one table
+## Melt the table along the 
+new_zealand_spotify_combined <- bind_rows(new_zealand_2023, new_zealand_spotify_2025_avg) |>
+                                  relocate(Country, year, everything())
+
+new_zealand_spotify_combined_melt <- melt(new_zealand_spotify_combined,
+                                          id.vars = c("Country", "year"),
+                                          measured.vars = c("danceability_avg",
+                                                            "energy_avg",
+                                                            "loudness_avg",
+                                                            "liveness_avg",
+                                                            "valence_avg",
+                                                            "tempo_avg"))
+
+new_zealand_spotify_combined_melt
+```
+
+### South Korea
+
+```{r}
+
+## Filter 2023 New Zealand spotify data
+## Mutate Country column so that it is now New Zealand 2023
+south_korea_2023 <- filter(spotify_global_2023_avg,
+                           Country == "South Korea") |>
+                    mutate(year = 2023)
+                            
+south_korea_2023
+```
+
+```{r}
+
+## Concat 2023 and 2025 New Zealand data into one table
+## Melt the table along the 
+south_korea_spotify_combined <- bind_rows(south_korea_2023, south_korea_spotify_2025_avg) |>
+                                  relocate(Country, year, everything())
+
+south_korea_spotify_combined_melt <- melt(south_korea_spotify_combined,
+                                          id.vars = c("Country", "year"),
+                                          measured.vars = c("danceability_avg",
+                                                            "energy_avg",
+                                                            "loudness_avg",
+                                                            "liveness_avg",
+                                                            "valence_avg",
+                                                            "tempo_avg"))
+
+south_korea_spotify_combined_melt
+```
+
+### USA
+
+```{r}
+
+## Filter 2023 New Zealand spotify data
+## Mutate Country column so that it is now New Zealand 2023
+usa_2023 <- filter(spotify_global_2023_avg,
+                   Country == "United States") |>
+            mutate(year = 2023)
+                            
+usa_2023
+```
+
+```{r}
+
+## Concat 2023 and 2025 New Zealand data into one table
+## Melt the table along the 
+usa_spotify_combined <- bind_rows(usa_2023, usa_spotify_2025_avg) |>
+                                  relocate(Country, year, everything())
+
+usa_spotify_combined_melt <- melt(usa_spotify_combined,
+                                          id.vars = c("Country", "year"),
+                                          measured.vars = c("danceability_avg",
+                                                            "energy_avg",
+                                                            "loudness_avg",
+                                                            "liveness_avg",
+                                                            "valence_avg",
+                                                            "tempo_avg"))
+
+usa_spotify_combined_melt
+```
