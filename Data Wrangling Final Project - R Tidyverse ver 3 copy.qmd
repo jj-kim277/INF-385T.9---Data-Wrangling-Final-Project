@@ -8,31 +8,14 @@ editor: visual
 
 ## R Tidyverse
 
-```{r}
-
-# WHR23 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/WHR23.csv')
-# 
-# universal_top_spotify_songs_2023 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs_2023.csv')
-# 
-# world_data_2023 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/world_data_2023.csv')
-# 
-# `10_16_25_new_zealand` <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_new_zealand.txt')
-# 
-# `10_16_25_korea` <-read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_korea.txt')
-# 
-# `10_16_25_usa` <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_usa.txt')
-# 
-# universal_top_spotify_songs <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs.csv')
-```
-
-### Load tidyverse and other analytic packages
+## Load tidyverse
 
 ```{r}
 
 library(tidyverse)
 ```
 
-### Import Dataset 1 - World Happiness Report
+## Import & Wrangle Dataset 1 - World Happiness Report
 
 References:
 
@@ -43,12 +26,15 @@ References:
 ```{r}
 
 ## Load World Happiness Report - 2023
+WHR23 <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/WHR23.csv')
+
 WHR23
 ```
 
 ```{r}
 
-## Remove Standard.error.of.ladder.score, upperwhiser, and lowerwhisker columns
+## Select Country.name,Ladder.score,Logged.GDP.per.capita, Social.support,Healthy.life.expectancy,
+## Freedom.to.make.life.choices,Generosity
 Happiness_report_23 <- WHR23 |>
                         select(c(Country.name,
                                  Ladder.score, 
@@ -76,7 +62,9 @@ happiness_report_23 <- Happiness_report_23 |>
 happiness_report_23
 ```
 
-### Import Dataset 2 - Spotify Global Top 50 Song Data (Kaggle)
+## Import & Wrangle Dataset 2 - Spotify Global Top 50 Song Data (Kaggle)
+
+References:
 
 <https://tidyr.tidyverse.org/reference/separate_wider_delim.html>
 
@@ -84,7 +72,9 @@ happiness_report_23
 
 ```{r}
 
-## Load global top spotify song dataset
+## Load global top spotify song (2023) dataset
+universal_top_spotify_songs_2023 <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs_2023.csv')
+
 universal_top_spotify_songs_2023
 ```
 
@@ -126,11 +116,13 @@ global_spotify_2023 <- spotify_2023 |>
 global_spotify_2023    
 ```
 
-### Import & Wrangle Dataset 3 - World Data 2023 (Kaggle)
+## Import & Wrangle Dataset 3 - World Data 2023 (Kaggle)
 
 ```{r}
 
 ## Load the world_data_2023
+world_data_2023 <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/world_data_2023.csv')
+
 world_data_2023
 ```
 
@@ -144,7 +136,9 @@ abbreviation_table <- world_data_2023 |>
 abbreviation_table
 ```
 
-### Import & Wrangle Dataset 4 - Weekly Charts of October 16, 2025 (Kworb)
+## Import & Wrangle Dataset 4 - Weekly Charts of October 16, 2025 (Kworb)
+
+References:
 
 <https://stringr.tidyverse.org/reference/case.html>
 
@@ -152,12 +146,19 @@ abbreviation_table
 
 <https://stringr.tidyverse.org/reference/str_trim.html>
 
-#### New Zealand Dataset
+### New Zealand Dataset
 
 ```{r}
 
-## Import weekly chart of New Zealand and remove all columns 
-## except for the Artist.and.Title column.
+## Import New Zealand's weekly chart of 10/16/2025
+`10_16_25_new_zealand` <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_new_zealand.csv')
+
+`10_16_25_new_zealand`
+```
+
+```{r}
+
+## Remove all columns except for the Artist.and.Title column.
 ## Separate artist and song title from the Artist.and.Title column
 new_zealand_25 <- `10_16_25_new_zealand` |>
                       select(Artist.and.Title) |>
@@ -165,7 +166,9 @@ new_zealand_25 <- `10_16_25_new_zealand` |>
                                            delim = "-",
                                            names = c("Artist", "Title"),
                                            too_many = "merge") 
+```
 
+```{r}
 
 ## Only keep the first artist
 ## For smoother joins, change following: 
@@ -179,25 +182,37 @@ new_zealand_2025 <- new_zealand_25 |>
 new_zealand_2025
 ```
 
-#### South Korea Dataset
+### South Korea Dataset
 
 ```{r}
 
-## Import weekly chart of South Korea and remove all columns 
-## except for the Artist.and.Title column
+## Import South Korea's weekly chart of 10/16/2025
+`10_16_25_korea` <-read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_korea.csv')
+
+`10_16_25_korea`
+```
+
+```{r}
+
+## Remove all columns except for the Artist.and.Title 
 ## Separate artist and song title from the Artist.and.Title column
-south_korea_25 <- `10_16_25_korea` |>
+korea_25 <- `10_16_25_korea` |>
                       select(Artist.and.Title) |>
                       separate_wider_delim(Artist.and.Title, 
                                            delim = "-",
                                            names = c("Artist", "Title"),
                                            too_many = "merge")
 
+korea_25
+```
+
+```{r}
+
 ## Only keep the first artist
 ## For smoother joins, change following: 
 ## Remove any white space before and after the title and artist columns
 ## Change the case to all lowercase for both title and artist columns
-south_korea_2025 <- south_korea_25 |>                      
+south_korea_2025 <- korea_25 |>                      
                       mutate(Artist = word(Artist, 1, sep = ",")) |>
                       mutate(Artist = str_to_lower(str_trim(Artist)),
                              Title = str_to_lower(str_trim(Title)))  
@@ -205,7 +220,15 @@ south_korea_2025 <- south_korea_25 |>
 south_korea_2025
 ```
 
-#### USA Dataset
+### USA Dataset
+
+```{r}
+
+## Import USA's weekly chart of 10/16/2025
+`10_16_25_usa` <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_usa.csv')
+
+`10_16_25_korea`
+```
 
 ```{r}
 
@@ -215,19 +238,23 @@ south_korea_2025
 ## Only keep the first artist
 ## Remove any white space before and after string
 ## Change both columns to all lowercase for smoother joining process.
-usa_25 <- `10_16_25_usa` |>
+us_25 <- `10_16_25_usa` |>
                select(Artist.and.Title) |>
                separate_wider_delim(Artist.and.Title, 
                                     delim = "-",
                                     names = c("Artist", "Title"),
                                     too_many = "merge")
 
-                                    
+us_25
+```
+
+```{r}
+
 ## Only keep the first artist
 ## For smoother joins, change following: 
 ## Remove any white space before and after the title and artist columns
 ## Change the case to all lowercase for both title and artist columns
-usa_2025 <- usa_25 |>
+usa_2025 <- us_25 |>
               mutate(Artist = word(Artist, 1, sep = ",")) |>
               mutate(Artist = str_to_lower(str_trim(Artist)),
                      Title = str_to_lower(str_trim(Title))) 
@@ -235,11 +262,21 @@ usa_2025 <- usa_25 |>
 usa_2025
 ```
 
-### Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
+## Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
 
 This dataset was last updated on June 11, 2025.
 
+References:
+
 <https://readr.tidyverse.org/reference/type_convert.html>
+
+```{r}
+
+## Import the Universal Top Spotify Songs dataset
+universal_top_spotify_songs <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs.csv')
+
+universal_top_spotify_songs
+```
 
 ```{r}
 
@@ -267,14 +304,7 @@ spotify_2025_R <- universal_spotify |>
 spotify_2025_R
 ```
 
-### Combine dataset 2 and 3 - replace country abbreviation with its full name
-
-```{r}
-
-abbreviation_table %>%
-  count(Country, sort = TRUE) %>%
-  filter(n > 1)
-```
+## Join dataset 2 and 3 - replace country abbreviation with its full name
 
 ```{r}
 
@@ -293,7 +323,7 @@ spotify_global_2023_matched <- global_spotify_2023 |>
 spotify_global_2023_matched
 ```
 
-### Aggregate danceability, energy, loudness, liveness, valence, and tempo by Country for 2023 Spotify Dataset
+## Aggregate danceability, energy, loudness, liveness, valence, and tempo by Country for 2023 Spotify Dataset
 
 ```{r}
 
@@ -310,11 +340,13 @@ spotify_global_2023_avg <- spotify_global_2023_matched |>
 spotify_global_2023_avg
 ```
 
-### Join Dataset 5 to Each Country's Dataset for 2025 Analysis
+## Join 2025 Spotify Dataset to Country Datasets for Analysis
+
+References:
 
 <https://dplyr.tidyverse.org/reference/distinct.html>
 
-#### New Zealand Dataset
+### New Zealand Dataset
 
 ```{r}
 
@@ -342,6 +374,7 @@ new_zealand_2025_matched_r_cleaned
 ```{r}
 
 ## Calculate average for each column
+## Add Country and year columns for identification
 ## Will be used later for 2023 and 2025 comparison
 new_zealand_spotify_2025_avg <- new_zealand_2025_matched_r_cleaned |>
                                   summarise(danceability_avg = mean(danceability),
@@ -356,7 +389,7 @@ new_zealand_spotify_2025_avg <- new_zealand_2025_matched_r_cleaned |>
 new_zealand_spotify_2025_avg
 ```
 
-#### South Korea Dataset
+### South Korea Dataset
 
 ```{r}
 
@@ -384,6 +417,7 @@ south_korea_2025_matched_r_cleaned
 ```{r}
 
 ## Calculate average for each column
+## Add Country and year columns for identification
 ## Will be used later for 2023 and 2025 comparison
 south_korea_spotify_2025_avg <- south_korea_2025_matched_r_cleaned |>
                                   summarise(danceability_avg = mean(danceability),
@@ -398,7 +432,7 @@ south_korea_spotify_2025_avg <- south_korea_2025_matched_r_cleaned |>
 south_korea_spotify_2025_avg
 ```
 
-#### USA Dataset
+### USA Dataset
 
 ```{r}
 
@@ -427,6 +461,7 @@ usa_2025_matched_r_cleaned
 ```{r}
 
 ## Calculate average for each column
+## Add Country and year columns for identification
 ## Will be used later for 2023 and 2025 comparison
 usa_spotify_2025_avg <- usa_2025_matched_r_cleaned |>
                           summarise(danceability_avg = mean(danceability),
@@ -442,6 +477,8 @@ usa_spotify_2025_avg
 ```
 
 ## Correlation Studies
+
+References:
 
 <https://www.geeksforgeeks.org/r-language/how-to-plot-a-correlation-matrix-into-a-graph-using-r/>
 
@@ -466,6 +503,8 @@ library(ggcorrplot)
 library(PerformanceAnalytics)
 library(reshape2)
 ```
+
+### Preparing Datasets for Correlation Analysis
 
 ```{r}
 
@@ -498,7 +537,7 @@ melted_matrix <- melt(cor_matrix_happiness_spotify_23)
 melted_matrix
 ```
 
-## Analyzing Correlations in the Top 10 Happiness Score Countries
+### Analyzing Correlations in the Top 10 Happiness Score Countries
 
 ```{r}
 
@@ -560,7 +599,7 @@ corrplot(top_happiness_countries_23_corr,
          col = COL2('RdBu', n = 200))
 ```
 
-## Analyzing Correlations in the Bottom 10 Happiness Score Countries
+### Analyzing Correlations in the Bottom 10 Happiness Score Countries
 
 ```{r}
 
