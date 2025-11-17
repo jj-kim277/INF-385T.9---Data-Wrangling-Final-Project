@@ -1,0 +1,1139 @@
+---
+title: "Final Project"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(DBI)
+library(duckdb)
+options(duckdb.enable_rstudio_connection_pane=TRUE)
+
+drv <- duckdb()
+con <- dbConnect(drv)
+```
+
+---
+title: "Final Project"
+format: html
+editor: visual
+---
+
+## INF 385T.9 - Data Wrangling Final Project: Does Positive Pop Music Portend Positive Attitudes?
+
+-- Import Dataset 1 - World Happiness Report
+
+References:
+
+<https://dplyr.tidyverse.org/reference/rename.html>
+
+<https://dplyr.tidyverse.org/reference/select.html>
+
+--Load World Happiness Report 2023
+
+```{sql}
+#| connection: con
+
+CREATE TABLE whr AS
+  SELECT *
+  FROM read_csv('whr.csv');
+
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM whr
+```
+
+-- Remove Standard.error.of.ladder.score, upperwhiser, and lowerwhisker columns -- Rename columns for more intuitive understanding
+
+```{sql}
+#| connection: con
+
+CREATE TABLE happiness_report_23 AS
+  SELECT "Country name" AS country_name,
+          "Ladder score" AS happiness_score,
+          "Logged GDP per capita" AS gdp_wellbeing,
+          "Social support" AS social_support,
+          "Healthy life expectancy" AS life_exp,
+          "Freedom to make life choices" AS freedom,
+          "Generosity" AS generosity
+  FROM whr
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM happiness_report_23
+```
+
+-- Import Dataset 2 - Spotify Global Top 50 Song Data (Kaggle)
+
+<https://tidyr.tidyverse.org/reference/separate_wider_delim.html>
+
+<https://dplyr.tidyverse.org/reference/relocate.html>
+
+-- Load global top spotify song dataset -- Select name, artists, country, danceability ,energy, loudness, valence, and tempo --Rename name column as title
+
+```{sql}
+#| connection: con
+
+CREATE TABLE spotify_2023 AS
+  SELECT name AS title,
+         artists,
+         country,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM read_csv('universal_top_spotify_songs.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM spotify_2023
+```
+
+-- Split the artists column and only keep the first artist
+
+```{sql}
+#| connection: con
+
+CREATE TABLE global_spotify_2023 AS
+  SELECT title,
+         STRING_SPLIT(artists, ',') [1] AS artist,
+         country,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM spotify_2023
+
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM global_spotify_2023
+```
+
+-- Import & Wrangle Dataset 3 - World Data 2023 (Kaggle)
+
+```{sql}
+#| connection: con
+
+CREATE TABLE world_data_2023 AS
+ SELECT *
+ FROM read_csv('world_data_2023.csv', strict_mode=false)
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM world_data_2023
+```
+
+-- Select County and Abbreviation columns only and assign it to a new table
+
+```{sql}
+#| connection: con
+CREATE TABLE abbreviation_table AS
+  SELECT Country AS country,
+         Abbreviation AS abbreviation
+  FROM world_data_2023
+``` 
+
+```{sql}
+#| connection: con
+SELECT *
+FROM abbreviation_table
+```
+
+
+--Import & Wrangle Dataset 4 - Weekly Charts of October 16, 2025 (Kworb)
+
+-- New Zealand Dataset -- Import weekly chart of New Zealand and remove all columns -- except for the Artist.and.Title column. -- Separate artist and song title from the Artist.and.Title column
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_10_16_25 AS
+  SELECT *
+  FROM read_csv('10_16_25_new_zealand.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM new_zealand_10_16_25
+```
+
+## Only keep the first artist
+
+## For smoother joins, change following:
+
+## Remove any white space before and after the title and artist columns
+
+## Change the case to all lowercase for both title and artist columns
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25 AS 
+  SELECT STRING_SPLIT("Artist and Title", '-')[1] AS artist,
+         STRING_SPLIT("Artist and Title", '-')[2] AS title
+  FROM new_zealand_10_16_25
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM new_zealand_25
+```
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM new_zealand_25;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_clean 
+```
+
+#### South Korea Dataset
+
+## Import weekly chart of South Korea and remove all columns
+
+## except for the Artist.and.Title column
+
+## Separate artist and song title from the Artist.and.Title column
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_10_16_25 AS
+  SELECT *
+  FROM read_csv('10_16_25_korea.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM korea_10_16_25
+```
+
+## Only keep the first artist
+
+## For smoother joins, change following:
+
+## Remove any white space before and after the title and artist columns
+
+## Change the case to all lowercase for both title and artist columns
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_25 AS 
+  SELECT STRING_SPLIT("Artist and Title", '-')[1] AS artist,
+         STRING_SPLIT("Artist and Title", '-')[2] AS title
+  FROM korea_10_16_25
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM korea_25
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM korea_25;
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM new_zealand_25;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_clean
+```
+
+#### USA Dataset
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa AS
+  SELECT *
+  FROM read_csv('10_16_25_usa.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM usa
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_25 AS 
+  SELECT STRING_SPLIT("Artist and Title", '-')[1] AS artist,
+         STRING_SPLIT("Artist and Title", '-')[2] AS title
+  FROM usa
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM usa_25
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM usa_25;
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM usa_25_clean
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE ireland_10_16_25 AS
+  SELECT *
+  FROM read_csv('10_16_25_ireland.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM ireland_10_16_25
+```
+
+
+```{sql}
+#| connection: con
+
+CREATE TABLE ireland_25 AS 
+  SELECT STRING_SPLIT("Artist and Title", '-')[1] AS artist,
+         STRING_SPLIT("Artist and Title", '-')[2] AS title
+  FROM ireland_10_16_25
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM ireland_25
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE ireland_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM ireland_25;
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM ireland_25_clean
+```
+
+
+## Import weekly chart of USA and remove all columns
+
+## except for the Artist.and.Title column
+
+## Separate artist and song title from the Artist.and.Title column
+
+## Only keep the first artist
+
+## Remove any white space before and after string
+
+## Change both columns to all lowercase for smoother joining process.
+
+## Only keep the first artist
+
+## For smoother joins, change following:
+
+## Remove any white space before and after the title and artist columns
+
+## Change the case to all lowercase for both title and artist columns
+
+### Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
+
+This dataset was last updated on June 11, 2025.
+
+<https://readr.tidyverse.org/reference/type_convert.html>
+
+-- Split the artists column and only keep the first artist
+
+```{sql}
+#| connection: con
+
+CREATE TABLE universal_spotify AS
+  SELECT name AS title,
+         artists AS artist,
+         country,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM read_csv('universal_top_spotify_songs_25.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM universal_spotify
+```
+
+## Split the artists column and only keep the first artist
+
+## Change both columns to all lowercase for smoother joining process.
+
+```{sql}
+#| connection: con
+
+CREATE TABLE spotify_2025_sql AS
+  SELECT title,
+         STRING_SPLIT(artist, ',') [1] AS artist,
+         country,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM universal_spotify
+
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM spotify_2025_sql
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE spotify_2025_unique AS
+SELECT DISTINCT title, artist, danceability, energy, loudness, valence, tempo
+FROM spotify_2025_sql;
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM spotify_2025_unique
+```
+
+```{sql}
+#| connection: con
+SELECT DISTINCT '"' || artist || '"' FROM new_zealand_25_clean;
+```
+
+
+-- Combine dataset 2 and 3 - replace country abbreviation with its full name \## Match spotify's country abbreviation with abbreviation table's abbreviation \## Remove any unmatched rows
+
+```{sql}
+#| connection: con
+
+CREATE TABLE spotify_global_2023_abbrev AS
+  SELECT *
+  FROM global_spotify_2023
+    LEFT JOIN abbreviation_table ON global_spotify_2023.country = abbreviation_table.abbreviation
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM spotify_global_2023_abbrev
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM spotify_global_2023_abbrev
+```
+
+## Drop abbreviation column
+
+## Rearrange country column to the front
+
+```{sql}
+#| connection: con
+CREATE TABLE spotify_global_2023_matched AS
+  SELECT country_1 AS country,
+         artist,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM spotify_global_2023_abbrev
+
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM spotify_global_2023_matched
+```
+
+### Aggregate danceability, energy, loudness, liveness, valence, and tempo by Country for 2023 Spotify Dataset
+
+## Calculate averages of spotify_global_2023_matched
+
+## dataset by Country
+
+```{sql}
+#| connection: con
+
+CREATE TABLE spotify_global_2023_avg AS
+  SELECT
+    country,
+    AVG(danceability) AS danceability_avg,
+    AVG(energy) AS energy_avg,
+    AVG(loudness) AS loudness_avg,
+    AVG(valence) AS valence_avg,
+    AVG(tempo) AS tempo_avg
+  FROM spotify_global_2023_matched
+  GROUP BY country;
+
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM spotify_global_2023_avg
+```
+
+### Join Dataset 5 to Each Country's Dataset for 2025 Analysis
+
+<https://dplyr.tidyverse.org/reference/distinct.html>
+
+#### New Zealand Dataset
+
+## Join New Zealand dataframe and updated Spotify dataframe
+
+## Left join to keep all the rows of left dataframe
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_matched_sql AS
+  SELECT nz.*, s.*
+  FROM new_zealand_25_clean AS nz
+  LEFT JOIN spotify_2025_unique AS s
+  ON nz.title = s.title
+    AND nz.artist = s.artist;
+    
+ALTER TABLE new_zealand_25_matched_sql
+DROP COLUMN artist_1;
+
+ALTER TABLE new_zealand_25_matched_sql
+DROP COLUMN title_1;
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM new_zealand_25_matched_sql
+```
+
+## Remove duplicate
+
+## Drop title and artist columns from
+
+## Drop duplicate rows and songs with no analytic data
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_matched_sql_cleaned AS 
+ SELECT artist,
+        title,
+        danceability,
+        energy,
+        loudness,
+        valence,
+        tempo
+ FROM new_zealand_25_matched_sql 
+```
+
+## Calculate average for each column
+
+## Will be used later for 2023 and 2025 comparison
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_spotify_25_avg AS 
+  SELECT AVG(danceability) AS danceability_avg,
+         AVG(energy) AS energy_avg,
+         AVG(loudness) AS loudness_avg,
+         AVG(valence) AS valence_avg,
+         AVG(tempo) AS tempo_avg,
+         2025 AS year
+  FROM new_zealand_25_matched_sql_cleaned 
+```
+
+#### South Korea Dataset
+
+#### Korea Dataset
+
+## Join Korea dataframe and updated Spotify dataframe
+
+## Left join to keep all the rows of left dataframe
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_25_matched_sql AS
+  SELECT k.*, s.*
+  FROM korea_25_clean AS k
+  LEFT JOIN spotify_2025_unique AS s
+  ON k.title = s.title
+    AND k.artist = s.artist;
+    
+ALTER TABLE korea_25_matched_sql
+DROP COLUMN artist_1;
+
+ALTER TABLE korea_25_matched_sql
+DROP COLUMN title_1;
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM korea_25_matched_sql
+```
+
+## Remove duplicate
+
+## Drop title and artist columns from spotify_2025_py_cleaned
+
+## Drop duplicate rows and songs with no analytic data
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_spotify_25_avg AS 
+ SELECT  AVG(danceability) AS danceability_avg,
+         AVG(energy) AS energy_avg,
+         AVG(loudness) AS loudness_avg,
+         AVG(valence) AS valence_avg,
+         AVG(tempo) AS tempo_avg,
+         2025 AS year
+ FROM korea_25_matched_sql 
+```
+
+#### USA Dataset
+
+## Join USA dataframe and updated Spotify dataframe
+
+## Left join to keep all the rows of left dataframe
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_25_matched_sql AS
+  SELECT u.*, s.*
+  FROM usa_25_clean AS u
+  LEFT JOIN spotify_2025_unique AS s
+  ON u.title = s.title
+    AND u.artist = s.artist;
+    
+ALTER TABLE usa_25_matched_sql
+DROP COLUMN artist_1;
+
+ALTER TABLE usa_25_matched_sql
+DROP COLUMN title_1;
+```
+
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_spotify_25_avg AS
+ SELECT AVG(danceability) AS danceability_avg,
+         AVG(energy) AS energy_avg,
+         AVG(loudness) AS loudness_avg,
+         AVG(valence) AS valence_avg,
+         AVG(tempo) AS tempo_avg,
+         2025 AS year
+ FROM usa_25_matched_sql 
+```
+
+
+### Join Dataset 5 to Each Country's Dataset for 2025 Analysis
+
+<https://dplyr.tidyverse.org/reference/distinct.html>
+
+#### Ireland Dataset
+
+## Join Ireland dataframe and updated Spotify dataframe
+
+## Left join to keep all the rows of left dataframe
+
+```{sql}
+#| connection: con
+
+CREATE TABLE ireland_25_matched_sql AS
+  SELECT i.*, s.*
+  FROM ireland_25_clean AS i
+  LEFT JOIN spotify_2025_unique AS s
+  ON i.title = s.title
+    AND i.artist = s.artist;
+    
+ALTER TABLE ireland_25_matched_sql
+DROP COLUMN artist_1;
+
+ALTER TABLE ireland_25_matched_sql
+DROP COLUMN title_1;
+```
+
+## Remove duplicate
+
+## Drop title and artist columns from spotify_2025_py_cleaned
+
+## Drop duplicate rows and songs with no analytic data
+
+```{sql}
+#| connection: con
+
+CREATE TABLE ireland_spotify_2025_avg AS 
+  SELECT AVG(danceability) AS danceability_avg,
+         AVG(energy) AS energy_avg,
+         AVG(loudness) AS loudness_avg,
+         AVG(valence) AS valence_avg,
+         AVG(tempo) AS tempo_avg
+         2025 AS year
+  FROM ireland_25_matched_sql
+```
+
+## Correlation Studies
+
+## Combine aggregated Spotify dataset with happiness report
+
+## Drop any countrys with no happiness score
+
+```{sql}
+#| connection: con
+
+CREATE TABLE happiness_spotify_2023 AS
+  SELECT *
+  FROM spotify_global_2023_avg
+    LEFT JOIN happiness_report_23 
+    ON spotify_global_2023_avg.country = happiness_report_23.country_name
+```
+```{sql}
+#| connection: con
+SELECT *
+FROM happiness_spotify_2023
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM spotify_global_2023_avg
+```
+
+## Remove Country column for correlation analysis
+
+```{sql}
+#| connection: con
+
+CREATE TABLE melted_matrix AS
+WITH cols AS (
+    SELECT * FROM (VALUES
+        ('danceability_avg'),
+        ('energy_avg'),
+        ('loudness_avg'),
+        ('valence_avg'),
+        ('tempo_avg'),
+        ('happiness_score'),
+        ('gdp_wellbeing'),
+        ('social_support'),
+        ('life_exp'),
+        ('freedom'),
+        ('generosity')
+    ) AS t(col)
+),
+pairs AS (
+    SELECT c1.col AS var1, c2.col AS var2
+    FROM cols c1 CROSS JOIN cols c2
+)
+SELECT
+    var1,
+    var2,
+    (
+        SELECT covar_samp(
+            CASE var1
+                WHEN 'danceability_avg' THEN danceability_avg
+                WHEN 'energy_avg' THEN energy_avg
+                WHEN 'loudness_avg' THEN loudness_avg
+                WHEN 'valence_avg' THEN valence_avg
+                WHEN 'tempo_avg' THEN tempo_avg
+                WHEN 'happiness_score' THEN happiness_score
+                WHEN 'gdp_wellbeing' THEN gdp_wellbeing
+                WHEN 'social_support' THEN social_support
+                WHEN 'life_exp' THEN life_exp
+                WHEN 'freedom' THEN freedom
+                WHEN 'generosity' THEN generosity
+            END,
+            CASE var2
+                WHEN 'danceability_avg' THEN danceability_avg
+                WHEN 'energy_avg' THEN energy_avg
+                WHEN 'loudness_avg' THEN loudness_avg
+                WHEN 'valence_avg' THEN valence_avg
+                WHEN 'tempo_avg' THEN tempo_avg
+                WHEN 'happiness_score' THEN happiness_score
+                WHEN 'gdp_wellbeing' THEN gdp_wellbeing
+                WHEN 'social_support' THEN social_support
+                WHEN 'life_exp' THEN life_exp
+                WHEN 'freedom' THEN freedom
+                WHEN 'generosity' THEN generosity
+            END
+        )
+        FROM happiness_spotify_2023
+    )
+    /
+    (
+        (SELECT stddev_samp(
+            CASE var1
+                WHEN 'danceability_avg' THEN danceability_avg
+                WHEN 'energy_avg' THEN energy_avg
+                WHEN 'loudness_avg' THEN loudness_avg
+                WHEN 'valence_avg' THEN valence_avg
+                WHEN 'tempo_avg' THEN tempo_avg
+                WHEN 'happiness_score' THEN happiness_score
+                WHEN 'gdp_wellbeing' THEN gdp_wellbeing
+                WHEN 'social_support' THEN social_support
+                WHEN 'life_exp' THEN life_exp
+                WHEN 'freedom' THEN freedom
+                WHEN 'generosity' THEN generosity
+            END
+        ) FROM happiness_spotify_2023)
+        *
+        (SELECT stddev_samp(
+            CASE var2
+                WHEN 'danceability_avg' THEN danceability_avg
+                WHEN 'energy_avg' THEN energy_avg
+                WHEN 'loudness_avg' THEN loudness_avg
+                WHEN 'valence_avg' THEN valence_avg
+                WHEN 'tempo_avg' THEN tempo_avg
+                WHEN 'happiness_score' THEN happiness_score
+                WHEN 'gdp_wellbeing' THEN gdp_wellbeing
+                WHEN 'social_support' THEN social_support
+                WHEN 'life_exp' THEN life_exp
+                WHEN 'freedom' THEN freedom
+                WHEN 'generosity' THEN generosity
+            END
+        ) FROM happiness_spotify_2023)
+    ) AS corr
+FROM pairs
+ORDER BY
+    CASE var1
+        WHEN 'danceability_avg' THEN 1
+        WHEN 'energy_avg' THEN 2
+        WHEN 'loudness_avg' THEN 3
+        WHEN 'valence_avg' THEN 4
+        WHEN 'tempo_avg' THEN 5
+        WHEN 'happiness_score' THEN 6
+        WHEN 'gdp_wellbeing' THEN 7
+        WHEN 'social_support' THEN 8
+        WHEN 'life_exp' THEN 9
+        WHEN 'freedom' THEN 10
+        WHEN 'generosity' THEN 11
+    END,
+    CASE var2
+        WHEN 'danceability_avg' THEN 1
+        WHEN 'energy_avg' THEN 2
+        WHEN 'loudness_avg' THEN 3
+        WHEN 'valence_avg' THEN 4
+        WHEN 'tempo_avg' THEN 5
+        WHEN 'happiness_score' THEN 6
+        WHEN 'gdp_wellbeing' THEN 7
+        WHEN 'social_support' THEN 8
+        WHEN 'life_exp' THEN 9
+        WHEN 'freedom' THEN 10
+        WHEN 'generosity' THEN 11
+    END;
+
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM melted_matrix
+```
+
+
+## Analyzing Correlations in the Top 10 Happiness Score Countries
+
+```{sql}
+#| connection: con
+CREATE TABLE top_happiness_score_spotify_23 AS
+ SELECT *
+ FROM happiness_spotify_2023
+ ORDER BY happiness_score DESC
+ LIMIT 10
+```
+## Remove Country column for correlation study
+
+```{sql}
+#| connection: con
+
+ALTER TABLE top_happiness_score_spotify_23
+DROP COLUMN Country
+```
+
+
+## Analyzing Correlations in the Bottom 10 Happiness Score Countries
+
+```{sql}
+#| connection: con
+
+CREATE TABLE bottom_happiness_score_spotify_23 AS
+ SELECT *
+ FROM happiness_spotify_2023
+ ORDER BY happiness_score
+ LIMIT 10
+```
+## Remove Country column for correlation study
+
+```{sql}
+#| connection: con
+
+ALTER TABLE bottom_happiness_score_spotify_23
+DROP COLUMN country
+
+```
+
+Since 2025 Happiness Report is not available yet, we will compare the average of music analytic components and note if theres any changes.
+
+Tools/Reference:
+
+### New Zealand
+
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_2023 AS
+  SELECT *,
+         2023 AS year
+  FROM spotify_global_2023_avg
+  WHERE country IN ('New Zealand');
+  
+ALTER TABLE new_zealand_2023
+DROP COLUMN country
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_2023
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_spotify_25_avg
+```
+
+```{sql}
+#| connection: con
+ 
+CREATE TABLE new_zealand_spotify_combined AS
+SELECT * FROM new_zealand_2023
+UNION ALL
+SELECT * FROM new_zealand_spotify_25_avg;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_spotify_combined
+```
+
+#Melt combined NZ table
+
+```{sql}
+#| connection: con
+#| 
+CREATE TABLE new_zealand_spotify_combined_melt AS
+SELECT *
+FROM new_zealand_spotify_combined
+UNPIVOT (
+    value FOR variable IN (
+        danceability_avg,
+        energy_avg,
+        loudness_avg,
+        valence_avg,
+        tempo_avg
+    )
+);
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_spotify_combined_melt
+```
+
+
+### South Korea
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_2023 AS
+  SELECT *,
+         2023 AS year
+  FROM spotify_global_2023_avg
+  WHERE country IN ('South Korea');
+  
+ALTER TABLE korea_2023
+DROP COLUMN country
+```
+
+```{sql}
+#| connection: con
+ 
+CREATE TABLE korea_spotify_combined AS
+SELECT * FROM korea_2023
+UNION ALL
+SELECT * FROM korea_spotify_25_avg;
+```
+
+```{sql}
+#| connection
+SELECT *
+FROM korea_spotify_combined
+```
+
+```{sql}
+#| connection: con
+#| 
+CREATE TABLE korea_spotify_combined_melt AS
+SELECT *
+FROM korea_spotify_combined
+UNPIVOT (
+    value FOR variable IN (
+        danceability_avg,
+        energy_avg,
+        loudness_avg,
+        valence_avg,
+        tempo_avg
+    )
+);
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM korea_spotify_combined_melt
+```
+
+### USA
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_2023 AS
+  SELECT *,
+         2023 AS year
+  FROM spotify_global_2023_avg
+  WHERE country IN ('United States');
+  
+ALTER TABLE usa_2023
+DROP COLUMN country
+```
+```{sql}
+#| connection: con
+SELECT *
+FROM usa_2023
+```
+
+```{sql}
+#| connection: con
+ 
+CREATE TABLE usa_spotify_combined AS
+SELECT * FROM usa_2023
+UNION ALL
+SELECT * FROM usa_spotify_25_avg;
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM usa_spotify_combined
+```
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_spotify_combined_melt AS
+SELECT *
+FROM usa_spotify_combined
+UNPIVOT (
+    value FOR variable IN (
+        danceability_avg,
+        energy_avg,
+        loudness_avg,
+        valence_avg,
+        tempo_avg
+    )
+);
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM usa_spotify_combined_melt
+```
