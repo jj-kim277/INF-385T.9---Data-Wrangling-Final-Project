@@ -1,3 +1,9 @@
+---
+title: "Final Project"
+format: html
+editor: visual
+---
+
 # Python Pandas
 
 ## Load packages
