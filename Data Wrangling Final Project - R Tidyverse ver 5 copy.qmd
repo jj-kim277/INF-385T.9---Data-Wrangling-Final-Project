@@ -323,7 +323,7 @@ spotify_global_2023_matched <- global_spotify_2023 |>
 spotify_global_2023_matched
 ```
 
-## Aggregate danceability, energy, loudness, liveness, valence, and tempo by Country for 2023 Spotify Dataset
+## Calculate mean danceability, energy, loudness, valence, and tempo by Country for 2023 Spotify Dataset
 
 ```{r}
 
@@ -361,8 +361,6 @@ new_zealand_2025_matched_r
 
 ```{r}
 
-## Remove duplicate 
-## Drop title and artist columns from spotify_2025_py_cleaned
 ## Drop duplicate rows and songs with no analytic data
 new_zealand_2025_matched_r_cleaned <- new_zealand_2025_matched_r |>
                                         distinct(Artist, Title, .keep_all = TRUE) |>
@@ -689,7 +687,7 @@ new_zealand_2023
 ```{r}
 
 ## Concat 2023 and 2025 New Zealand data into one table
-## Melt the table along the 
+## Melt the table along the Country and year
 new_zealand_spotify_combined <- bind_rows(new_zealand_2023, new_zealand_spotify_2025_avg) |>
                                   relocate(Country, year, everything())
 
@@ -721,7 +719,7 @@ south_korea_2023
 ```{r}
 
 ## Concat 2023 and 2025 New Zealand data into one table
-## Melt the table along the 
+## Melt the table along the Country and year
 south_korea_spotify_combined <- bind_rows(south_korea_2023, south_korea_spotify_2025_avg) |>
                                   relocate(Country, year, everything())
 
@@ -753,7 +751,7 @@ usa_2023
 ```{r}
 
 ## Concat 2023 and 2025 New Zealand data into one table
-## Melt the table along the 
+## Melt the table along the Country and year
 usa_spotify_combined <- bind_rows(usa_2023, usa_spotify_2025_avg) |>
                                   relocate(Country, year, everything())
 
