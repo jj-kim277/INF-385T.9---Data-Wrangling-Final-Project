@@ -1,0 +1,711 @@
+---
+title: "Troubleshooting Country Match Tables"
+format: html
+editor: visual
+---
+
+## Datasets
+
+```{r}
+
+# WHR23 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/WHR23.csv')
+# 
+# universal_top_spotify_songs_2023 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs_2023.csv')
+# 
+# world_data_2023 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/world_data_2023.csv')
+# 
+# `10_16_25_new_zealand` <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_new_zealand.txt')
+# 
+# `10_16_25_korea` <-read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_korea.txt')
+# 
+# `10_16_25_usa` <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_usa.txt')
+# 
+# universal_top_spotify_songs <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs.csv')
+```
+
+### Load tidyverse, DuckDB and other analytic packages
+
+```{r}
+
+library(tidyverse)
+library(DBI)
+library(duckdb)
+options(duckdb.enable_rstudio_connection_pane=TRUE)
+
+drv <- duckdb()
+con <- dbConnect(drv)
+```
+
+## R Code - Matching 2025 Country Tables with Spotify Metadata
+
+### Import & Wrangle Dataset 4 - Weekly Charts of October 16, 2025 (Kworb)
+
+<https://stringr.tidyverse.org/reference/case.html>
+
+<https://stringr.tidyverse.org/reference/word.html>
+
+<https://stringr.tidyverse.org/reference/str_trim.html>
+
+#### New Zealand Dataset
+
+```{r}
+
+## Import weekly chart of New Zealand and remove all columns 
+## except for the Artist.and.Title column.
+## Separate artist and song title from the Artist.and.Title column
+new_zealand_25 <- read.csv('10_16_25_new_zealand.csv') |>
+                      select(Artist.and.Title) |>
+                      separate_wider_delim(Artist.and.Title, 
+                                           delim = " - ",
+                                           names = c("Artist", "Title"),
+                                           too_many = "merge") 
+
+
+## Only keep the first artist
+## For smoother joins, change following: 
+## Remove any white space before and after the title and artist columns
+## Change the case to all lowercase for both title and artist columns
+new_zealand_2025 <- new_zealand_25 |>
+                      mutate(Artist = word(Artist, 1, sep = ",")) |>
+                      mutate(Artist = str_to_lower(str_trim(Artist)),
+                             Title = str_to_lower(str_trim(Title)))
+
+new_zealand_2025
+```
+
+#### South Korea Dataset
+
+```{r}
+
+## Import weekly chart of South Korea and remove all columns 
+## except for the Artist.and.Title column
+## Separate artist and song title from the Artist.and.Title column
+south_korea_25 <- read.csv('10_16_25_korea.csv') |>
+                      select(Artist.and.Title) |>
+                      separate_wider_delim(Artist.and.Title, 
+                                           delim = "-",
+                                           names = c("Artist", "Title"),
+                                           too_many = "merge")
+
+## Only keep the first artist
+## For smoother joins, change following: 
+## Remove any white space before and after the title and artist columns
+## Change the case to all lowercase for both title and artist columns
+south_korea_2025 <- south_korea_25 |>                      
+                      mutate(Artist = word(Artist, 1, sep = ",")) |>
+                      mutate(Artist = str_to_lower(str_trim(Artist)),
+                             Title = str_to_lower(str_trim(Title)))  
+
+south_korea_2025
+```
+
+#### USA Dataset
+
+```{r}
+
+## Import weekly chart of USA and remove all columns 
+## except for the Artist.and.Title column
+## Separate artist and song title from the Artist.and.Title column
+## Only keep the first artist
+## Remove any white space before and after string
+## Change both columns to all lowercase for smoother joining process.
+usa_25 <- read.csv('10_16_25_usa.csv') |>
+               select(Artist.and.Title) |>
+               separate_wider_delim(Artist.and.Title, 
+                                    delim = "-",
+                                    names = c("Artist", "Title"),
+                                    too_many = "merge")
+
+                                    
+## Only keep the first artist
+## For smoother joins, change following: 
+## Remove any white space before and after the title and artist columns
+## Change the case to all lowercase for both title and artist columns
+usa_2025 <- usa_25 |>
+              mutate(Artist = word(Artist, 1, sep = ",")) |>
+              mutate(Artist = str_to_lower(str_trim(Artist)),
+                     Title = str_to_lower(str_trim(Title))) 
+
+usa_2025
+```
+
+## Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
+
+<https://readr.tidyverse.org/reference/type_convert.html>
+
+```{r}
+
+## Import the Universal Top Spotify Songs dataset
+## Keep following columns only:
+## name, artists, danceability, energy, loudness, liveness, tempo
+universal_spotify <- read.csv('universal_top_spotify_songs_25.csv') |>
+                      select(name, artists, danceability, energy, loudness, valence, tempo)|>
+                      rename(title = name)
+    
+universal_spotify
+```
+
+```{r}
+
+## Split the artists column and only keep the first artist
+## Change both columns to all lowercase for smoother joining process.
+spotify_2025_R <- universal_spotify |>
+                    mutate(artists = str_to_lower(str_trim(as.character(artists))), 
+                             title = str_to_lower(str_trim(title))) |>
+                    mutate(artist = word(artists, 1, sep = ",")) |>
+                    select(-artists) |>
+                    relocate(artist, .after = title)
+
+spotify_2025_R
+```
+
+### Join Dataset 5 to Each Country's Dataset for 2025 Analysis
+
+<https://dplyr.tidyverse.org/reference/distinct.html>
+
+#### New Zealand Dataset
+
+```{r}
+
+## Join New Zealand dataframe and updated Spotify dataframe
+## Left join to keep all the rows of left dataframe
+new_zealand_2025_matched_r <- new_zealand_2025 |>
+                                left_join(spotify_2025_R,
+                                          join_by(Artist == artist,
+                                                  Title == title))
+new_zealand_2025_matched_r
+```
+
+```{r}
+
+## Remove duplicate 
+## Drop title and artist columns from spotify_2025_py_cleaned
+## Drop duplicate rows and songs with no analytic data
+new_zealand_2025_matched_r_cleaned <- new_zealand_2025_matched_r |>
+                                        distinct(Artist, Title, .keep_all = TRUE) |>
+                                        drop_na(danceability)
+
+new_zealand_2025_matched_r_cleaned
+```
+
+```{r}
+
+## Calculate average for each column
+## Will be used later for 2023 and 2025 comparison
+new_zealand_spotify_2025_avg <- new_zealand_2025_matched_r_cleaned |>
+                                  summarise(danceability_avg = mean(danceability),
+                                            energy_avg = mean(energy),
+                                            loudness_avg = mean(loudness),
+                                            valence_avg = mean(valence),
+                                            tempo_avg = mean(tempo)) |>
+                                  mutate(Country = "New Zealand",
+                                         year = 2025) |>
+                                  relocate(Country, year, everything())
+
+new_zealand_spotify_2025_avg
+```
+
+#### South Korea Dataset
+
+```{r}
+
+## Join South Korea dataframe and updated Spotify dataframe
+## Left join to keep all the rows of left dataframe
+south_korea_2025_matched_r <- south_korea_2025 |>
+                                left_join(spotify_2025_R,
+                                          join_by(Artist == artist,
+                                                  Title == title))
+south_korea_2025_matched_r
+```
+
+```{r}
+
+## Remove duplicate 
+## Drop title and artist columns from spotify_2025_py_cleaned
+## Drop duplicate rows and songs with no analytic data
+south_korea_2025_matched_r_cleaned <- south_korea_2025_matched_r |>
+                                        distinct(Artist, Title, .keep_all = TRUE) |>
+                                        drop_na(danceability) |>
+                                        arrange(Artist, by_group = TRUE)
+
+south_korea_2025_matched_r_cleaned
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM korea_25_matched_sql_cleaned
+```
+
+```{r}
+
+## Calculate average for each column
+## Will be used later for 2023 and 2025 comparison
+south_korea_spotify_2025_avg <- south_korea_2025_matched_r_cleaned |>
+                                  summarise(danceability_avg = mean(danceability),
+                                            energy_avg = mean(energy),
+                                            loudness_avg = mean(loudness),
+                                            valence_avg = mean(valence),
+                                            tempo_avg = mean(tempo)) |>
+                                  mutate(Country = "South Korea",
+                                         year = 2025) |>
+                                  relocate(Country, year, everything())
+
+south_korea_spotify_2025_avg
+```
+
+#### USA Dataset
+
+```{r}
+
+## Join USA dataframe and updated Spotify dataframe
+## Left join to keep all the rows of left dataframe
+usa_2025_matched_r <- usa_2025 |>
+                        left_join(spotify_2025_R,
+                                  join_by(Artist == artist,
+                                          Title == title))
+
+usa_2025_matched_r
+```
+
+```{r}
+
+## Remove duplicate 
+## Drop title and artist columns from spotify_2025_py_cleaned
+## Drop duplicate rows and songs with no analytic data
+usa_2025_matched_r_cleaned <- usa_2025_matched_r |>
+                                        distinct(Artist, Title, .keep_all = TRUE) |>
+                                        drop_na(danceability)
+
+usa_2025_matched_r_cleaned
+```
+
+```{r}
+
+## Calculate average for each column
+## Will be used later for 2023 and 2025 comparison
+usa_spotify_2025_avg <- usa_2025_matched_r_cleaned |>
+                          summarise(danceability_avg = mean(danceability),
+                                    energy_avg = mean(energy),
+                                    loudness_avg = mean(loudness),
+                                    valence_avg = mean(valence),
+                                    tempo_avg = mean(tempo)) |>
+                          mutate(Country = "United States",
+                                 year = 2025) |>
+                          relocate(Country, year, everything())
+
+usa_spotify_2025_avg
+```
+
+## SQL Code
+
+## Import & Wrangle Dataset 4 - Weekly Charts of October 16, 2025 (Kworb)
+
+## New Zealand Dataset -- Import weekly chart of New Zealand and remove all columns except for the Artist and Title column. -- Separate artist and song title from the Artist.and.Title column
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_10_16_25 AS
+  SELECT *
+  FROM read_csv('10_16_25_new_zealand.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM new_zealand_10_16_25
+```
+
+## Only keep the first artist
+
+## For smoother joins, change following:
+
+## Remove any white space before and after the title and artist columns
+
+## Change the case to all lowercase for both title and artist columns
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25 AS 
+  SELECT LOWER(STRING_SPLIT("Artist and Title", ' - ')[1]) AS artist,
+         LOWER(STRING_SPLIT("Artist and Title", ' - ')[2]) AS title
+  FROM new_zealand_10_16_25
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM new_zealand_25
+ORDER BY artist
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM new_zealand_25;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_clean 
+```
+
+## South Korea Dataset
+
+## Import weekly chart of South Korea and remove all columns except for the Artist.and.Title column
+
+## Separate artist and song title from the Artist.and.Title column
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_10_16_25 AS
+  SELECT *
+  FROM read_csv('10_16_25_korea.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM korea_10_16_25
+```
+
+## Only keep the first artist
+
+## For smoother joins, change following:
+
+## -Remove any white space before and after the title and artist columns
+
+## -Change the case to all lowercase for both title and artist columns
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_25 AS 
+  SELECT LOWER(STRING_SPLIT("Artist and Title", ' - ')[1]) AS artist,
+         LOWER(STRING_SPLIT("Artist and Title", ' - ')[2]) AS title
+  FROM korea_10_16_25
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM korea_25
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM korea_25;
+```
+
+```{sql}
+#| connection: con
+
+SELECT * 
+FROM korea_25_clean
+ORDER BY artist
+
+```
+
+#### USA Dataset
+
+## Import weekly chart
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa AS
+  SELECT *
+  FROM read_csv('10_16_25_usa.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM usa
+```
+
+## Remove all columns but Artist and Title
+## Split column into separate Artist and Titles using - delimiter
+## Render split columns in lowercase
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_25 AS 
+  SELECT LOWER(STRING_SPLIT("Artist and Title", ' - ')[1]) AS artist,
+         LOWER(STRING_SPLIT("Artist and Title", ' - ')[2]) AS title
+  FROM usa
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM usa_25
+ORDER BY artist
+```
+## Remove white space from columns
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_25_clean AS
+SELECT
+    TRIM(artist) AS artist,
+    TRIM(title) AS title
+FROM usa_25;
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM usa_25_clean
+```
+
+### Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
+
+## Import 2025 Spotify dataset
+## Select only relevant columns and rename columns during import
+## render title and artist in lowercase
+
+```{sql}
+#| connection: con
+
+CREATE TABLE universal_spotify AS
+  SELECT LOWER(name) AS title,
+         LOWER(artists) AS artist,
+         country,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM read_csv('universal_top_spotify_songs_25.csv')
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM universal_spotify
+
+```
+
+## Split the artists column and only keep the first artist
+
+## Change both columns to all lowercase for smoother joining process.
+
+```{sql}
+#| connection: con
+
+CREATE TABLE spotify_2025_sql AS
+  SELECT title,
+         (STRING_SPLIT(artist, ',') [1]) AS artist,
+         country,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM universal_spotify
+
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM spotify_2025_sql
+```
+
+#### Join Dataset 5 to Each Country's Dataset for 2025 Analysis
+
+### New Zealand Dataset
+
+## Join New Zealand dataframe and updated Spotify dataframe
+
+## Left join to keep all the rows of left dataframe
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_matched_sql AS
+  SELECT nz.*, s.*
+  FROM new_zealand_25_clean AS nz
+  LEFT JOIN spotify_2025_sql AS s
+  ON nz.title = s.title
+    AND nz.artist = s.artist;
+    
+ALTER TABLE new_zealand_25_matched_sql
+DROP COLUMN artist_1;
+
+ALTER TABLE new_zealand_25_matched_sql
+DROP COLUMN title_1;
+```
+
+```{sql}
+#| connection: con
+SELECT *
+FROM new_zealand_25_matched_sql
+```
+
+## Remove duplicate
+
+## Drop title and artist columns from
+
+## Drop duplicate rows and songs with no analytic data
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_matched_sql_cleaned AS 
+ SELECT DISTINCT ON (artist, title) *
+ FROM new_zealand_25_matched_sql 
+ WHERE danceability IS NOT NULL
+ ORDER BY artist, title
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_matched_sql_cleaned
+```
+
+
+## Calculate average for each column
+
+## Will be used later for 2023 and 2025 comparison
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_spotify_25_avg AS 
+  SELECT AVG(danceability) AS danceability_avg,
+         AVG(energy) AS energy_avg,
+         AVG(loudness) AS loudness_avg,
+         AVG(valence) AS valence_avg,
+         AVG(tempo) AS tempo_avg,
+         2025 AS year
+  FROM new_zealand_25_matched_sql_cleaned 
+```
+
+#### South Korea Dataset
+
+#### Korea Dataset
+
+## Join Korea dataframe and updated Spotify dataframe
+
+## Left join to keep all the rows of left dataframe
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_25_matched_sql AS
+  SELECT k.*, s.*
+  FROM korea_25_clean AS k
+  LEFT JOIN spotify_2025_sql AS s
+  ON k.title = s.title
+    AND k.artist = s.artist;
+    
+ALTER TABLE korea_25_matched_sql
+DROP COLUMN artist_1;
+
+ALTER TABLE korea_25_matched_sql
+DROP COLUMN title_1;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM korea_25_matched_sql
+WHERE artist IN ('car, the garden')
+```
+
+## Remove duplicate
+## Drop duplicate rows and songs with no analytic data
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_25_matched_sql_cleaned AS 
+ SELECT DISTINCT ON (artist, title) *
+ FROM korea_25_matched_sql 
+ WHERE danceability IS NOT NULL
+ ORDER BY artist, title
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM korea_25_matched_sql_cleaned
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE korea_spotify_25_avg AS 
+ SELECT  AVG(danceability) AS danceability_avg,
+         AVG(energy) AS energy_avg,
+         AVG(loudness) AS loudness_avg,
+         AVG(valence) AS valence_avg,
+         AVG(tempo) AS tempo_avg,
+         2025 AS year
+ FROM korea_25_matched_sql_cleaned
+```
+
+#### USA Dataset
+
+## Join USA dataframe and updated Spotify dataframe
+
+## Left join to keep all the rows of left dataframe
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_25_matched_sql AS
+  SELECT u.*, s.*
+  FROM usa_25_clean AS u
+  LEFT JOIN spotify_2025_sql AS s
+  ON u.title = s.title
+    AND u.artist = s.artist;
+    
+ALTER TABLE usa_25_matched_sql
+DROP COLUMN artist_1;
+
+ALTER TABLE usa_25_matched_sql
+DROP COLUMN title_1;
+```
+
+```{sql}
+#| connection: con
+
+CREATE TABLE usa_matched_sql_cleaned AS 
+ SELECT DISTINCT ON (artist, title) *
+ FROM usa_25_matched_sql 
+ WHERE danceability IS NOT NULL
+ ORDER BY artist, title
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM usa_matched_sql_cleaned
+ORDER BY artist
+```
+
