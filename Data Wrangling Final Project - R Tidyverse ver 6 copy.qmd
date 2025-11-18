@@ -109,7 +109,8 @@ global_spotify_2023 <- spotify_2023 |>
                           mutate(artists = str_to_lower(str_trim(as.character(artists))), 
                                  title = str_to_lower(str_trim(title))) |>
                           mutate(artist = word(artists, 1, sep = ",")) |>
-                          select(-artists) 
+                          select(-artists) |>
+                          drop_na(country)
 
 
                     

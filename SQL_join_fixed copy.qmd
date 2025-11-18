@@ -1,0 +1,277 @@
+---
+title: "SQL Table Joins"
+format: html
+editor: visual
+---
+
+## 
+
+I finally figured it out. When I manually compared the SQL table `new_zealand_25_matched_sql_cleaned` with the Pandas dataframe `new_zealand_2025_matched_cleaned`, I noticed that the SQL table was missing songs containing extra hyphens (`-`).
+
+In Pandas, I explicitly instructed it to split the string into two parts at the first hyphen, grouping everything after the first hyphen into the `Title` column:
+
+```{python}
+Artist = lambda df_: df_['Artist and Title'].str.split('-',  n = 1).str[0]
+```
+
+However, in SQL, the `Artist and Title` field was being split at every hyphen. For example, titles like `"Hotel California - 2013 Remaster"` were incorrectly split into `"Hotel California"` and `"2013 Remaster"`, which prevented them from matching with the Spotify 2025 dataframe.
+
+To fix this, I reformatted the New Zealand dataset using the example from this Stack Overflow (<https://stackoverflow.com/questions/4036036/php-substr-after-a-certain-char-a-substr-strpos-elegant-solution>). After changing the code to fit our data, `new_zealand_25_matched_sql_cleaned` returned 104 rows, consistent with the Tidyverse and Pandas outputs.
+
+Also, for the Kworb datasets, we need to apply `STRING_SPLIT` twice: first to separate the artist and title, and then to further split the artist field. This step was missing in my previous Tidyverse and Pandas code, but the most recent versions reflects these changes.
+
+Changing those lines of code should fix the problem #1 and 3 you encountered. I didnt have a chance to apply it to the whole SQL code yet, but the test on the New Zealand dataset appears to match correctly, so I am hoping its going to work for other two countries as well.
+
+Fortunately, the `spotify_global_2023_avg` problem was an easy fix. I dropped rows with `NaN` in the `country` column when loading Dataset 2. Previously, rows with missing country information were being incorrectly matched to countries without abbreviations. Removing these rows left only the valid countries in the analysis.
+
+# Fixed
+
+![](images/clipboard-2865927347.png)
+
+Phew. I was starting to get super worries about this. I think with this fix, we should be good to go.
+
+```{r}
+library(tidyverse)
+library(DBI)
+library(duckdb)
+options(duckdb.enable_rstudio_connection_pane=TRUE)
+
+drv <- duckdb()
+con <- dbConnect(drv)
+```
+
+```{r}
+
+# WHR23 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/WHR23.csv')
+# 
+# universal_top_spotify_songs_2023 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs_2023.csv')
+# 
+# world_data_2023 <- read.csv('/Users/jenniferkim/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/world_data_2023.csv')
+# 
+`10_16_25_new_zealand` <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_new_zealand.csv')
+
+`10_16_25_korea` <-read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_korea.csv')
+
+`10_16_25_usa` <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_usa.csv')
+
+universal_top_spotify_songs <- read.csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs.csv')
+```
+
+## New Zealand Dataset
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_10_16_25 AS 
+  SELECT *
+  FROM read_csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_new_zealand.csv')
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_10_16_25
+```
+
+```{sql}
+#| connection: con
+
+-- Split Artist and Title column using STRING_SPLIT
+-- First element in the list will be artist and
+-- Second element in the list will be title
+
+DROP TABLE IF EXISTS new_zealand_25_1;
+
+CREATE TABLE new_zealand_25_1 AS
+  SELECT TRIM(SUBSTR("Artist and Title", 1, STRPOS("Artist and Title", '-') - 1)) AS artist,
+         TRIM(SUBSTR("Artist and Title", STRPOS("Artist and Title", '-') + 1)) AS title
+  FROM new_zealand_10_16_25
+```
+
+\*\* This is where the code would be different. For these Kworb datasets, we need to STRING_SPLIT twice. First to split the Artist and Title, and another to split artist down further. My old code sisnt run the second one and gave different number from Tidyverse and Pandas but with that update, they both match.
+
+<https://docs.snowflake.com/en/sql-reference/functions/split_part>
+
+<https://www.dbvis.com/thetable/sql-drop-table-if-exists-statement-complete-guide/>
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_1;
+```
+
+```{sql}
+#| connection: con
+
+-- Only keep the first artist
+
+DROP TABLE IF EXISTS new_zealand_25_2;
+
+CREATE TABLE new_zealand_25_2 AS
+  SELECT STRING_SPLIT("artist", ',')[1] AS artist,
+          title
+  FROM new_zealand_25_1;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_2;
+```
+
+```{sql}
+#| connection: con
+
+-- For smoother joins, change following:
+-- Remove any white space before and after the title and artist columns
+-- Change the case to all lowercase for both title and artist columns
+DROP TABLE IF EXISTS new_zealand_25_clean;
+
+CREATE TABLE new_zealand_25_clean AS
+  SELECT TRIM(LOWER(title)) AS title,
+         TRIM(LOWER(artist)) AS artist
+  FROM new_zealand_25_2;
+  
+
+SELECT *
+FROM new_zealand_25_clean;
+```
+
+## Import 2025 Spotify dataset
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS universal_spotify;
+
+CREATE TABLE universal_spotify AS
+  SELECT name AS title,
+         artists AS artist,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM read_csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/universal_top_spotify_songs.csv');
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM universal_spotify;
+```
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS spotify_2025_sql_1;
+
+CREATE TABLE spotify_2025_sql_1 AS
+  SELECT title,
+         STRING_SPLIT(artist, ',')[1] AS artist,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM universal_spotify;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM spotify_2025_sql_1
+```
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS spotify_2025_sql;
+
+CREATE TABLE spotify_2025_sql AS
+  SELECT TRIM(LOWER(title)) AS title,
+         TRIM(LOWER(artist)) AS artist,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM spotify_2025_sql_1;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM spotify_2025_sql
+```
+
+## Join New Zealand dataframe and updated Spotify dataframe
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS new_zealand_25_matched_sql;
+
+CREATE TABLE new_zealand_25_matched_sql AS
+  SELECT nz.title AS title,
+         nz.artist AS artist,
+         s.title AS s_title,
+         s.artist AS s_artist,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM new_zealand_25_clean AS nz
+  LEFT JOIN spotify_2025_sql AS s
+  ON nz.title = s.title
+    AND nz.artist = s.artist;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_matched_sql;
+```
+
+```{sql}
+#| connection: con
+
+ALTER TABLE new_zealand_25_matched_sql
+DROP COLUMN s_title;
+
+ALTER TABLE new_zealand_25_matched_sql
+DROP COLUMN s_artist;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_matched_sql;
+```
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS new_zealand_25_matched_sql_cleaned;
+
+CREATE TABLE new_zealand_25_matched_sql_cleaned AS 
+ SELECT DISTINCT ON (artist, title) *
+ FROM new_zealand_25_matched_sql
+ WHERE danceability IS NOT NULL;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_matched_sql_cleaned
+```

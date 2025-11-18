@@ -112,7 +112,7 @@ global_spotify_2023 = (
             title = lambda df_: df_['title'].str.strip().str.lower())
     .drop(columns = ['artists'])
     .replace(" ", "")
-
+    .dropna(subset=['country'])
 )
 
 
@@ -324,7 +324,6 @@ spotify_global_2023_matched = (
          how = 'left')
   .drop(columns = ['country', 
                    'Abbreviation'])
-  .dropna()
 )
 
 
@@ -792,6 +791,10 @@ print(south_korea_spotify_combined_melt)
 ```
 
 ### USA
+
+```{python}
+
+```
 
 ```{python}
 
