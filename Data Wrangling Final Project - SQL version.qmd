@@ -183,35 +183,63 @@ FROM new_zealand_10_16_25
 ```{sql}
 #| connection: con
 
-CREATE TABLE new_zealand_25 AS 
-  SELECT LOWER(STRING_SPLIT("Artist and Title", ' - ')[1]) AS artist,
-         LOWER(STRING_SPLIT("Artist and Title", ' - ')[2]) AS title
+CREATE TABLE new_zealand_25_1 AS
+  SELECT TRIM(SUBSTR("Artist and Title", 1, STRPOS("Artist and Title", '-') - 1)) AS artist,
+         TRIM(SUBSTR("Artist and Title", STRPOS("Artist and Title", '-') + 1)) AS title
   FROM new_zealand_10_16_25
 ```
 
 ```{sql}
 #| connection: con
 SELECT *
-FROM new_zealand_25
+FROM new_zealand_25_1
 ORDER BY artist
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_25_1;
 ```
 
 ```{sql}
 #| connection: con
 
-CREATE TABLE new_zealand_25_clean AS
-SELECT
-    TRIM(artist) AS artist,
-    TRIM(title) AS title
-FROM new_zealand_25;
+-- Only keep the first artist
+
+DROP TABLE IF EXISTS new_zealand_25_2;
+
+CREATE TABLE new_zealand_25_2 AS
+  SELECT STRING_SPLIT("artist", ',')[1] AS artist,
+          title
+  FROM new_zealand_25_1;
 ```
 
 ```{sql}
 #| connection: con
 
 SELECT *
-FROM new_zealand_25_clean 
+FROM new_zealand_25_2;
 ```
+
+```{sql}
+#| connection: con
+
+-- For smoother joins, change following:
+-- Remove any white space before and after the title and artist columns
+-- Change the case to all lowercase for both title and artist columns
+DROP TABLE IF EXISTS new_zealand_25_clean;
+
+CREATE TABLE new_zealand_25_clean AS
+  SELECT TRIM(LOWER(artist)) AS artist,
+         TRIM(LOWER(title)) AS title,
+  FROM new_zealand_25_2;
+  
+
+SELECT *
+FROM new_zealand_25_clean;
+```
+
 
 ## South Korea Dataset
 
@@ -219,8 +247,10 @@ FROM new_zealand_25_clean
 
 ## Separate artist and song title from the Artist.and.Title column
 
+
 ```{sql}
 #| connection: con
+DROP TABLE IF EXISTS korea_10_16_25;
 
 CREATE TABLE korea_10_16_25 AS
   SELECT *
@@ -237,51 +267,80 @@ FROM korea_10_16_25
 
 ## For smoother joins, change following:
 
-## -Remove any white space before and after the title and artist columns
+## Remove any white space before and after the title and artist columns
 
-## -Change the case to all lowercase for both title and artist columns
+## Change the case to all lowercase for both title and artist columns
 
 ```{sql}
 #| connection: con
+DROP TABLE IF EXISTS korea_25_1;
 
-CREATE TABLE korea_25 AS 
-  SELECT LOWER(STRING_SPLIT("Artist and Title", ' - ')[1]) AS artist,
-         LOWER(STRING_SPLIT("Artist and Title", ' - ')[2]) AS title
+CREATE TABLE korea_25_1 AS
+  SELECT TRIM(SUBSTR("Artist and Title", 1, STRPOS("Artist and Title", '-') - 1)) AS artist,
+         TRIM(SUBSTR("Artist and Title", STRPOS("Artist and Title", '-') + 1)) AS title
   FROM korea_10_16_25
 ```
 
 ```{sql}
 #| connection: con
 SELECT *
-FROM korea_25
+FROM korea_25_1
+ORDER BY artist
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM korea_25_1;
 ```
 
 ```{sql}
 #| connection: con
+
+-- Only keep the first artist
+
+DROP TABLE IF EXISTS korea_25_2;
+
+CREATE TABLE korea_25_2 AS
+  SELECT STRING_SPLIT("artist", ',')[1] AS artist,
+          title
+  FROM korea_25_1;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM korea_25_2;
+```
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS korea_25_clean;
 
 CREATE TABLE korea_25_clean AS
-SELECT
-    TRIM(artist) AS artist,
-    TRIM(title) AS title
-FROM korea_25;
+  SELECT TRIM(LOWER(title)) AS title,
+         TRIM(LOWER(artist)) AS artist
+  FROM korea_25_2;
+  
 ```
-
 ```{sql}
 #| connection: con
 
-SELECT * 
-FROM korea_25_clean
-
+SELECT *
+FROM korea_25_clean;
 ```
 
 #### USA Dataset
 
 ## Import weekly chart
 
+
 ```{sql}
 #| connection: con
 
-CREATE TABLE usa AS
+CREATE TABLE usa_10_16_25 AS
   SELECT *
   FROM read_csv('10_16_25_usa.csv')
 ```
@@ -289,91 +348,139 @@ CREATE TABLE usa AS
 ```{sql}
 #| connection: con
 SELECT *
-FROM usa
+FROM usa_10_16_25
 ```
 
-## Remove all columns but Artist and Title
-## Split column into separate Artist and Titles using - delimiter
-## Render split columns in lowercase
+## Only keep the first artist
+
+## For smoother joins, change following:
+
+## Remove any white space before and after the title and artist columns
+
+## Change the case to all lowercase for both title and artist columns
 
 ```{sql}
 #| connection: con
 
-CREATE TABLE usa_25 AS 
-  SELECT LOWER(STRING_SPLIT("Artist and Title", ' - ')[1]) AS artist,
-         LOWER(STRING_SPLIT("Artist and Title", ' - ')[2]) AS title
-  FROM usa
+CREATE TABLE usa_25_1 AS
+  SELECT TRIM(SUBSTR("Artist and Title", 1, STRPOS("Artist and Title", '-') - 1)) AS artist,
+         TRIM(SUBSTR("Artist and Title", STRPOS("Artist and Title", '-') + 1)) AS title
+  FROM usa_10_16_25
 ```
 
 ```{sql}
 #| connection: con
 SELECT *
-FROM usa_25
+FROM usa_25_1
+ORDER BY artist
 ```
-## Remove white space from columns
+```{sql}
+#| connection: con
+
+SELECT *
+FROM usa_25_1;
+```
 
 ```{sql}
 #| connection: con
+
+-- Only keep the first artist
+
+DROP TABLE IF EXISTS usa_25_2;
+
+CREATE TABLE usa_25_2 AS
+  SELECT STRING_SPLIT("artist", ',')[1] AS artist,
+          title
+  FROM usa_25_1;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM usa_25_2;
+```
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS usa_25_clean;
 
 CREATE TABLE usa_25_clean AS
-SELECT
-    TRIM(artist) AS artist,
-    TRIM(title) AS title
-FROM usa_25;
+  SELECT TRIM(LOWER(title)) AS title,
+         TRIM(LOWER(artist)) AS artist
+  FROM usa_25_2;
 ```
 
 ```{sql}
 #| connection: con
 SELECT *
-FROM usa_25_clean
+FROM usa_25_clean;
 ```
-
-### Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
 
 ## Import 2025 Spotify dataset
-## Select only relevant columns and rename columns during import
-## render title and artist in lowercase
 
 ```{sql}
 #| connection: con
+
+DROP TABLE IF EXISTS universal_spotify;
 
 CREATE TABLE universal_spotify AS
-  SELECT LOWER(name) AS title,
-         LOWER(artists) AS artist,
-         country,
+  SELECT name AS title,
+         artists AS artist,
          danceability,
          energy,
          loudness,
          valence,
          tempo
-  FROM read_csv('universal_top_spotify_songs_25.csv')
+  FROM read_csv('universal_top_spotify_songs_25.csv', ignore_errors=true);
 ```
 
 ```{sql}
 #| connection: con
+
 SELECT *
-FROM universal_spotify
-
+FROM universal_spotify;
 ```
-
-## Split the artists column and only keep the first artist
-
-## Change both columns to all lowercase for smoother joining process.
 
 ```{sql}
 #| connection: con
+
+DROP TABLE IF EXISTS spotify_2025_sql_1;
+
+CREATE TABLE spotify_2025_sql_1 AS
+  SELECT title,
+         STRING_SPLIT(artist, ',')[1] AS artist,
+         danceability,
+         energy,
+         loudness,
+         valence,
+         tempo
+  FROM universal_spotify;
+```
+
+```{sql}
+#| connection: con
+
+SELECT *
+FROM spotify_2025_sql_1
+WHERE artist IN('Sabrina Carpenter')
+```
+
+```{sql}
+#| connection: con
+
+DROP TABLE IF EXISTS spotify_2025_sql;
 
 CREATE TABLE spotify_2025_sql AS
-  SELECT title,
-         (STRING_SPLIT(artist, ',') [1]) AS artist,
-         country,
+  SELECT TRIM(LOWER(title)) AS title,
+         TRIM(LOWER(artist)) AS artist,
          danceability,
          energy,
          loudness,
          valence,
          tempo
-  FROM universal_spotify
-
+  FROM spotify_2025_sql_1;
 ```
 
 ```{sql}
@@ -381,6 +488,7 @@ CREATE TABLE spotify_2025_sql AS
 
 SELECT *
 FROM spotify_2025_sql
+WHERE artist IN ('earth')
 ```
 
 ## Combine dataset 2 and 3 
@@ -523,6 +631,12 @@ CREATE TABLE new_zealand_spotify_25_avg AS
          AVG(tempo) AS tempo_avg,
          2025 AS year
   FROM new_zealand_25_matched_sql_cleaned 
+```
+```{sql}
+#| connection: con
+
+SELECT *
+FROM new_zealand_spotify_25_avg
 ```
 
 #### South Korea Dataset
@@ -669,12 +783,6 @@ CREATE TABLE happiness_spotify_2023 AS
 #| connection: con
 SELECT *
 FROM happiness_spotify_2023
-```
-
-```{sql}
-#| connection: con
-SELECT *
-FROM spotify_global_2023_avg
 ```
 
 ## Remove Country column for correlation analysis
@@ -827,6 +935,13 @@ ALTER TABLE top_happiness_score_spotify_23
 DROP COLUMN Country
 ```
 
+```{sql}
+#| connection: con
+
+SELECT *
+FROM top_happiness_score_spotify_23
+```
+
 ## Analyzing Correlations in the Bottom 10 Happiness Score Countries
 
 ```{sql}
@@ -848,8 +963,15 @@ ALTER TABLE bottom_happiness_score_spotify_23
 DROP COLUMN country
 
 ```
+```{sql}
+#| connection: con
 
-#Since 2025 Happiness Report is not available yet, we will compare the average of music analytic components and note if therea are any changes.
+SELECT *
+FROM bottom_happiness_score_spotify_23
+```
+
+
+#Since 2025 Happiness Report is not available yet, we will compare the average of music analytic components and note if there are any changes.
 
 ### New Zealand
 
@@ -873,12 +995,6 @@ SELECT *
 FROM new_zealand_2023
 ```
 
-```{sql}
-#| connection: con
-
-SELECT *
-FROM new_zealand_spotify_25_avg
-```
 
 ```{sql}
 #| connection: con
@@ -947,7 +1063,7 @@ SELECT * FROM korea_spotify_25_avg;
 ```
 
 ```{sql}
-#| connection
+#| connection: con 
 SELECT *
 FROM korea_spotify_combined
 ```
