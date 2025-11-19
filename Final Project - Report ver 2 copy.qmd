@@ -74,6 +74,10 @@ For this project, the following columns will be extracted from the dataset:
     month. Once again, the answers were logged using a binary system where 0 is no and 1\
     is yes.
 
+![](images/clipboard-335209506.png)
+
+![](images/clipboard-713039055.png)
+
 ### Dataset 2: Spotify Global Top 50 Song Data (Kaggle)
 
 \
@@ -95,6 +99,10 @@ tempo, and country where it was ranked.
 
 -   Tempo is the song’s speed represented by beats per minute (BPM).\
 
+![](images/clipboard-1485039293.png)
+
+![](images/clipboard-3242745562.png)
+
 ### Dataset 3: World Data 2023 (Kaggle)
 
 \
@@ -103,11 +111,31 @@ dataset to their formal country names. This dataset was the most appropriate map
 since both this and the Spotify datasets were compiled by the same author. From this dataset,\
 only the Country and Abbreviation columns will be extracted.
 
+![](images/clipboard-1848254178.png)
+
+![](images/clipboard-1301945000.png)
+
+![](images/clipboard-3015841952.png)
+
+![](images/clipboard-3480840374.png){width="433"}
+
 ### Dataset 4: Aggregated Weekly Chart (Kworb)
 
 \
 To compare national happiness with current music trends, this dataset will include recent\
 popular music charts from kworb.net for selected countries. Since this website updates its chart on daily and weekly basis, for this project, chart from 10/16/2025 will be used. Only the ‘Artist’ and ‘Title’ columns will be extracted.
+
+#### New Zealand
+
+![](images/clipboard-3537418739.png){width="822"}
+
+#### South Korea
+
+![](images/clipboard-1687199638.png){width="821"}
+
+#### USA
+
+####  ![](images/clipboard-109143997.png){width="816"}
 
 ### Dataset 5: Universal Top Spotify Songs (Kaggle)
 
@@ -126,8 +154,31 @@ This dataset compiles top songs that are trending up to June 2025. Though the au
 
 -   Tempo is the song’s speed represented by beats per minute (BPM).
 
+![](images/clipboard-486788560.png)
+
+![![](images/clipboard-2053557204.png){width="225"}](images/clipboard-2196377743.png)
+
 ## Conclusion
 
-top 10 and bottom 10 heatmap
+### top 10 and bottom 10 heatmap
 
-2023 -2025 comparison
+### 2023 -2025 comparison
+
+### Challenges
+
+One of the most interesting challenges we faced was ensuring that R Tidyverse, Python Pandas, SQL, and Excel Power Query all produced the exact same results. Since we started working on the R Tidyverse code first, we used those results as our baseline. However, when we tried to replicate the process in Python and SQL, each produced different results and we were stumped as to why the number of rows didn’t match, despite using identical datasets and logic.
+
+After some trial and error, we discovered that the problem were caused by the way some titles were written. For the Kworb’s Weekly Spotify Charts, as it can be seen from the dataset screenshot above, we needed to split the Artists and Title column into its own respective columns. To do this, we defined hyphen as delimiter and selected the first indexed substring as artists and the second indexed substring as title. This method worked perfectly for majority of songs. However, songs like “Hotel California – 2013 remaster” contained additional hyphens and only a part of the title were kept (e.g. “Hotel California”). This caused a join error since the 2025 Spotify dataset retained the full title.
+
+To overcome this challenge, we needed to find a way to group every substring after the first delimiter into one. This was a relatively easy fix for the Tidyverse and Pandas as we only needed to include one additional parameter inside the string splitting function (see figures below). However, this was exceptionally difficult with SQL. After thorough research, we found a solution with SUBSTR() and STRPOS() functions. Rather than using the STRING_SPLIT() function, we needed to use the SUBSTR() to first extract sub-strings within the ‘Artist and Title’ column. Then we needed to use STRPOS() function to specify that every substring after the first delimiter needed to be group as one. The following is the final code for this task in duckDB SQL is shown below:
+
+```{sql}
+#| connection: con
+
+CREATE TABLE new_zealand_25_1 AS
+  SELECT TRIM(SUBSTR("Artist and Title", 1, STRPOS("Artist and Title", '-') - 1)) AS artist,
+         TRIM(SUBSTR("Artist and Title", STRPOS("Artist and Title", '-') + 1)) AS title
+  FROM new_zealand_10_16_25
+```
+
+Once those changes were made, we were able to obtain identical rows across all languages and were able to proceed to correlation analysis.
