@@ -4,9 +4,9 @@ format: html
 editor: visual
 ---
 
-## INF 385T.9 - Data Wrangling Final Project: Does Positive Pop Music Portend Positive Attitudes?
+# INF 385T.9 - Data Wrangling Final Project: Does Positive Pop Music Portend Positive Attitudes?
 
-## R Tidyverse
+# R Tidyverse
 
 ## Load tidyverse
 
@@ -34,9 +34,8 @@ WHR23
 ```{r}
 
 ## Keep only the key variables from the World Happiness Report: 
-## Country, Ladder Score (Happiness score), and the six contributing factors:
-## GDP per Capita, Social Support, Healthy life expectancy, 
-## Freedom to make life choices, and Generosity
+## Country, Ladder Score (Happiness score), GDP per Capita, 
+## Social Support, Healthy life expectancy, Freedom to make life choices, and Generosity
 Happiness_report_23 <- WHR23 |>
                         select(c(Country.name,
                                  Ladder.score, 
@@ -51,8 +50,8 @@ Happiness_report_23
 
 ```{r}
 
-## Standardize column names using 'snake_case' for easier 
-## manipulation and cleaner referencing
+## Standardize column names using 'snake_case' 
+## for easier manipulation and cleaner referencing
 happiness_report_23 <- Happiness_report_23 |>
                         rename(c(country_name = Country.name,
                                  happiness_score = Ladder.score,
@@ -81,8 +80,8 @@ universal_top_spotify_songs_2023
 
 ```{r}
 
-## Select 'name', 'artists', 'country', 'danceability' ,'energy', 
-## 'loudness', 'valence', and 'tempo' columns only
+## Select the song title, artist, country, and the 
+## 5 main audio features (danceability, energy, loudness, valence, tempo)
 spotify_2023 <- universal_top_spotify_songs_2023 |>
                   select(c(name, 
                            artists, 
@@ -139,7 +138,7 @@ world_data_2023
 
 ```{r}
 
-## Create a'abbreviation_table' containing only Country names and their corresponding 
+## Create a 'abbreviation_table' containing only Country names and their corresponding 
 ## Abbreviation for later joining with the Spotify dataset
 abbreviation_table <- world_data_2023 |>
                         select(Country, Abbreviation)
@@ -515,7 +514,7 @@ library(reshape2)
 happiness_spotify_2023 <- spotify_global_2023_avg |>
                                 left_join(happiness_report_23, 
                                 join_by(Country == country_name))|>
-                                drop_na()
+                                drop_na(happiness_score)
 
 happiness_spotify_2023
 ```

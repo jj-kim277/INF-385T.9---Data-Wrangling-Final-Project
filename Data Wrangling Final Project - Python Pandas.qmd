@@ -1,8 +1,4 @@
----
-title: "Final Project"
-format: html
-editor: visual
----
+# INF 385T.9 - Data Wrangling Final Project: Does Positive Pop Music Portend Positive Attitudes?
 
 # Python Pandas
 
@@ -20,7 +16,7 @@ from io import StringIO
 import numpy as np
 ```
 
-## Import Dataset 1 - World Happiness Report
+## Dataset 1 - World Happiness Report (WHR)
 
 ```{python}
 
@@ -34,8 +30,10 @@ print(WHR23.columns)
 
 ```{python}
 
-## Select Country.name,Ladder.score,Logged.GDP.per.capita, Social.support,Healthy.life.expectancy
-## Freedom.to.make.life.choices,Generosity
+## Keep only the key variables from the World Happiness Report: 
+## Country, Ladder Score (Happiness score), GDP per Capita, 
+## Social Support, Healthy life expectancy, Freedom to make life choices, and Generosity
+## Freedom to make life choices, and Generosity
 WHR23 = WHR23.filter(items = ['Country name', 
                               'Ladder score',
                               'Logged GDP per capita',
@@ -49,8 +47,8 @@ print(WHR23.columns)
 
 ```{python}
 
-## Rename columns to replace spaces with underscore
-## and a new name for more intuitive understanding
+## Standardize column names using 'snake_case' for 
+## easier manipulation and cleaner referencing
 Happiness_report_23 = WHR23.rename(columns = {'Country name': 'country_name',
                                               'Ladder score': 'happiness_score',
                                               'Logged GDP per capita': 'gdp_wellbeing',
@@ -63,15 +61,17 @@ print(Happiness_report_23)
 print(Happiness_report_23.columns)
 ```
 
-## Import Dataset 2
+## Dataset 2 - 2023 Universal Top Spotify Songs
+
+References:
 
 <https://www.geeksforgeeks.org/python/python-remove-spaces-from-a-string/>
 
 <https://www.geeksforgeeks.org/python/python-string-lower/>
 
-<https://pandas.pydata.org/docs/user_guide/text.html?utm_source=chatgpt.com>
+[https://pandas.pydata.org/docs/user_guide/text.html](https://pandas.pydata.org/docs/user_guide/text.html?utm_source=chatgpt.com){.uri}
 
-<https://stackoverflow.com/questions/29761915/case-insensitive-pandas-dataframe-merge?utm_source=chatgpt.com>
+[https://stackoverflow.com/questions/29761915/case-insensitive-pandas-dataframe-merge](https://stackoverflow.com/questions/29761915/case-insensitive-pandas-dataframe-merge?utm_source=chatgpt.com){.uri}
 
 ```{python}
 
@@ -85,7 +85,8 @@ print(universal_top_spotify_songs_2023.columns)
 
 ```{python}
 
-## Select name, artists, country, danceability ,energy, loudness, valence, and tempo
+## Select the song title, artist, country, and the 
+## 5 main audio features (danceability, energy, loudness, valence, tempo)
 spotify_2023 = universal_top_spotify_songs_2023.filter(items = ['name', 
                                                                 'artists',
                                                                 'country',
@@ -107,18 +108,17 @@ print(spotify_2023.columns)
 
 ```{python}
 
-## Split the artists column and only keep the first artist
-## For smoother joins, make following changes: 
-## Remove any white space before and after the title and artist columns
-## Change the case to all lowercase for both title and artist columns
+## Clean the 'artists' and 'title' columns for joining:
+## 1. Convert to lowercase and trim whitespace 
+## 2. Extract only the primary artist using 'word' function.
+## 3. Remove rows with missing country data for reliable aggregation.
 global_spotify_2023 = (
-  
   spotify_2023
     .assign(artist = lambda df_: df_['artists'].str.split(',').str[0].str.strip().str.lower(),
             title = lambda df_: df_['title'].str.strip().str.lower())
     .drop(columns = ['artists'])
-    .replace(" ", "")
     .dropna(subset=['country'])
+    
 )
 
 
@@ -130,7 +130,7 @@ print(global_spotify_2023)
 print(global_spotify_2023.columns)
 ```
 
-## Import Dataset 3
+## Dataset 3 - World Dataset
 
 ```{python}
 
@@ -143,14 +143,15 @@ print(world_data_2023.columns)
 
 ```{python}
 
-## Select only the Country and Abbreviation columns
+## Create a 'abbreviation_table' containing only Country names and their 
+## corresponding Abbreviation for later joining with the Spotify dataset
 abbreviation_table = world_data_2023.filter(items = ['Country', 'Abbreviation'])
 
 
 abbreviation_table
 ```
 
-## Import Dataset 4
+## Dataset 4 - Weekly Top Spotify Chart (10/16/2025) (Kworb)
 
 <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.str.split.html>
 
@@ -167,8 +168,9 @@ print(new_zealand_25.columns)
 
 ```{python}
 
-## Extract only the Artist.and.Title column
-## Separate artist and song title from the Artist.and.Title column
+## Remove all columns except for the 'Artist.and.Title' column.
+## Separate artist and song title from the 'Artist.and.Title' column
+## 
 new_zealand_filtered = (
   new_zealand_25
   .filter(items = ['Artist and Title'])
@@ -184,9 +186,9 @@ print(new_zealand_filtered.columns)
 
 ```{python}
 
-## Split the Artist column and keep only the first artist
-## Remove any white space before and after string
-## Change both columns to all lowercase for easier matching
+## Extract only the first artist
+## Clean the 'artists' and 'title' columns for joining:
+## Convert to lowercase and trim whitespace
 new_zealand_filtered_2025 = (
   new_zealand_filtered
   .assign(Artist = lambda df_: df_['Artist'].str.split(',',  n = 1).str[0].str.strip().str.lower(),
@@ -200,22 +202,23 @@ new_zealand_filtered_2025
 
 ```{python}
 
-## Import Ireland's weekly chart for 10-16-2025
+## Import South Korea's weekly chart for 10-16-2025
 south_korea_2025 = pd.read_csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_korea.csv')
 
 
+print(south_korea_2025)
 print(south_korea_2025.columns)
 ```
 
 ```{python}
 
-## Extract only the Artist.and.Title column
-## Separate artist and song title from the Artist.and.Title column
+## Remove all columns except for the 'Artist.and.Title' column.
+## Separate artist and song title from the 'Artist.and.Title' column
 south_korea_filtered = (
   south_korea_2025
   .filter(items = ['Artist and Title'])
-  .assign(Artist = lambda df_: df_['Artist and Title'].astype(str).str.split('-',  n = 1).str[0],
-          Title = lambda df_: df_['Artist and Title'].astype(str).str.split('-',  n = 1).str[1])
+  .assign(Artist = lambda df_: df_['Artist and Title'].str.split('-',  n = 1).str[0],
+          Title = lambda df_: df_['Artist and Title'].str.split('-',  n = 1).str[1])
   .drop(columns = ['Artist and Title'])  
   )
   
@@ -225,9 +228,9 @@ south_korea_filtered
 
 ```{python}
 
-## Split the Artist column and keep only the first artist
-## Remove any white space before and after string
-## Change both columns to all lowercase for easier matching
+## Extract only the first artist
+## Clean the 'artists' and 'title' columns for joining:
+## Convert to lowercase and trim whitespace
 south_korea_filtered_2025 = (
   south_korea_filtered
   .assign(Artist = lambda df_: df_['Artist'].str.split(',',  n = 1).str[0].str.strip().str.lower(),
@@ -243,7 +246,7 @@ south_korea_filtered_2025
 
 ```{python}
 
-## Import Ireland's weekly chart for 10-16-2025
+## Import USA's weekly chart for 10-16-2025
 usa_25 = pd.read_csv('/Users/Jaykay/Desktop/INF 385T.9 - Data Wrangling/Final Project Data/10_16_25_usa.csv')
 
 
@@ -269,9 +272,9 @@ usa_filtered
 
 ```{python}
 
-## Split the Artist column and keep only the first artist
-## Remove any white space before and after string
-## Change both columns to all lowercase for easier matching
+## Extract only the first artist
+## Clean the 'artists' and 'title' columns for joining:
+## Convert to lowercase and trim whitespace
 usa_filtered_2025 = (
   usa_filtered
   .assign(Artist = lambda df_: df_['Artist'].str.split(',',  n = 1).str[0].str.strip().str.lower(),
@@ -283,7 +286,9 @@ usa_filtered_2025 = (
 usa_filtered_2025
 ```
 
-## Import & Wrangle Dataset 5 - Universal Top Spotify Songs (Kaggle)
+## Dataset 5 - Universal Top Spotify Songs (Kaggle)
+
+This dataset was last updated on June 11, 2025.
 
 ```{python}
 
@@ -297,10 +302,11 @@ print(universal_top_spotify_songs.columns)
 
 ```{python}
 
-## Keep following columns only:
-## name, artists, danceability, energy, loudness, liveness, tempo
-## Remove any white space before and after string
-## Change both columns to all lowercase for easier matching
+## Select 'name', 'artists', 'country', 'danceability' ,'energy', 
+## 'loudness', 'valence', and 'tempo' columns only
+## Extract only the first artist
+## Clean the 'artists' and 'title' columns for joining:
+## Convert to lowercase and trim whitespace
 spotify_2025_py_cleaned = (
   universal_top_spotify_songs
   .assign(artist = lambda df_: df_['artists'].astype(str).str.split(',').str[0].str.strip().str.lower())
@@ -313,13 +319,14 @@ print(spotify_2025_py_cleaned)
 print(spotify_2025_py_cleaned.columns)
 ```
 
-## Combine dataset 2 and 3 - replace country abbreviation with its full name
+## Joining Dataset 2 and 3 - Replacing Abbreviations with Full Country Names
 
 ```{python}
 
-## Match spotify's country abbreviation with abbreviation table's abbreviation
-## Drop abbreviation column
-## Rearrange country column to the front
+## Join Spotify data with the abbreviation table to replace country codes with 
+## full Country names using columns with abbreviations
+## Drop 'abbreviation' column
+## Relocate the 'country' column to the front
 ## Remove any unmatched rows
 spotify_global_2023_matched = (
 
@@ -330,6 +337,7 @@ spotify_global_2023_matched = (
          how = 'left')
   .drop(columns = ['country', 
                    'Abbreviation'])
+  .dropna(subset=['Country'])
 )
 
 
@@ -337,12 +345,12 @@ print(spotify_global_2023_matched)
 print(spotify_global_2023_matched.columns)
 ```
 
-## Calculate mean danceability, energy, loudness, valence, and tempo by Country for 2023 Spotify Dataset
+## Aggregating Mean Audio Features by Country for the 2023 Spotify Dataset (Danceability, Energy, Loudness, Valence, Tempo)
 
 ```{python}
 
-## Calculate averages of spotify_global_2023_matched 
-## dataset by Country
+## Calculate mean of all five audio features (danceability, energy, loudness, valence, tempo)
+## for each Country in the spotify_global_2023_matched dataset
 spotify_global_2023_avg = (
   spotify_global_2023_matched
     .groupby('Country')
@@ -359,7 +367,9 @@ print(spotify_global_2023_avg)
 print(spotify_global_2023_avg.columns)
 ```
 
-## Join 2025 Spotify Dataset to Country Datasets for 2025 Happiness Analysis
+## Joining Universal Song Data with Country-Specific Charts (2025)
+
+References:
 
 <https://stackoverflow.com/questions/60006995/round-while-groupping-by-in-pandas-with-agg-function?utm_source=chatgpt.com>
 
@@ -367,8 +377,7 @@ print(spotify_global_2023_avg.columns)
 
 ```{python}
 
-## Join New Zealand dataframe and updated Spotify dataframe
-## Left join to keep all the rows of left dataframe
+## Join New Zealand dataframe and 2025 Spotify dataframe
 new_zealand_2025_matched = new_zealand_filtered_2025.merge(
     spotify_2025_py_cleaned,
     left_on = ['Title', 'Artist'],
@@ -383,9 +392,10 @@ print(new_zealand_2025_matched.columns)
 
 ```{python}
 
-## Clean up the joined dataframe
+## Clean the joined 2025 dataset:
 ## Drop title and artist columns from new_zealand_2025_matched
-## Drop duplicate rows and songs with no analytic data
+## Remove duplicate song entries
+## Drop rows where audio features are missing
 ## Add Country and year column for aggretation and future analysis
 new_zealand_2025_matched_cleaned = (
   new_zealand_2025_matched
@@ -405,12 +415,11 @@ print(new_zealand_2025_matched_cleaned.columns)
 
 ```{python}
 
-## Calculate average for each column
-## Add Country and year columns for identification
-## Will be used later for 2023 and 2025 comparison
+## Calculate mean values for all audio metrics
+## Add Country and year columns as identifiers
 new_zealand_2025_avg = (
   new_zealand_2025_matched_cleaned
-    .groupby('Country')
+    .groupby('Country')    
     .agg(danceability_avg = ('danceability', 'mean'),
          energy_avg = ('energy', 'mean'),
          loudness_avg = ('loudness', 'mean'),
@@ -429,13 +438,13 @@ print(new_zealand_2025_avg)
 
 ```{python}
 
-## Join South Korea dataframe and updated Spotify dataframe
-## Left join to keep all the rows of left dataframe
+## Join South Korea dataframe and 2025 Spotify dataframe
 south_korea_2025_matched = south_korea_filtered_2025.merge(
     spotify_2025_py_cleaned,
     left_on = ['Title', 'Artist'],
     right_on = ['title', 'artist'],
     how = 'left'
+    
 )
 
 
@@ -445,9 +454,10 @@ print(south_korea_2025_matched.columns)
 
 ```{python}
 
-## Clean up the joined dataframe
+## Clean the joined 2025 dataset:
 ## Drop title and artist columns from south_korea_2025_matched
-## Drop duplicate rows and songs with no analytic data
+## Remove duplicate song entries
+## Drop rows where audio features are missing
 ## Add Country and year column for aggretation and future analysis
 south_korea_2025_matched_cleaned = (
   south_korea_2025_matched
@@ -456,8 +466,9 @@ south_korea_2025_matched_cleaned = (
     .dropna(subset = ['danceability'])
     .assign(Country = "South Korea",
             year = 2025)
-    .reset_index(drop=True)  ## No longer need the old index
-  )
+    .reset_index(drop=True)  ## Need the Country as its own column
+
+)
 
 
 print(south_korea_2025_matched_cleaned)
@@ -466,9 +477,8 @@ print(south_korea_2025_matched_cleaned.columns)
 
 ```{python}
 
-## Calculate average for each column
-## Add Country and year columns for identification
-## Will be used later for 2023 and 2025 comparison
+## Calculate mean values for all audio metrics
+## Add Country and year columns as identifiers
 south_korea_2025_avg = (
   south_korea_2025_matched_cleaned
     .groupby('Country')
@@ -490,7 +500,7 @@ print(south_korea_2025_avg)
 
 ```{python}
 
-## Join South Korea dataframe and updated Spotify dataframe
+## Join United States dataframe and updated Spotify dataframe
 ## Left join to keep all the rows of left dataframe
 usa_2025_matched = usa_filtered_2025.merge(
     spotify_2025_py_cleaned,
@@ -506,9 +516,10 @@ print(usa_2025_matched.columns)
 
 ```{python}
 
-## Clean up the joined dataframe
+## Clean the joined 2025 dataset:
 ## Drop title and artist columns from usa_2025_matched
-## Drop duplicate rows and songs with no analytic data
+## Remove duplicate song entries
+## Drop rows where audio features are missing
 ## Add Country and year column for aggretation and future analysis
 usa_2025_matched_cleaned = (
   usa_2025_matched
@@ -527,9 +538,8 @@ print(usa_2025_matched_cleaned.columns)
 
 ```{python}
 
-## Calculate average for each column
-## Add Country and year columns for identification
-## Will be used later for 2023 and 2025 comparison
+## Calculate mean values for all audio metrics
+## Add Country and year columns as identifiers
 usa_2025_avg = (
   usa_2025_matched_cleaned
     .groupby('Country')
@@ -583,14 +593,18 @@ import matplotlib.pyplot as plt
 
 ```{python}
 
-## Left join spotify_global_2023_avg with Happiness_report_23
-happiness_spotify_2023_pd = spotify_global_2023_avg.merge(
-  Happiness_report_23,
-  left_on = ['Country'],
-  right_on = ['country_name'],
-  how = 'left'
-  
+## Combine the spotify_global_2023_avg dataset with Happiness_report_23 
+## Drop any rows where a happiness score is not available
+happiness_spotify_2023_pd = (
+  spotify_global_2023_avg
+    .merge(Happiness_report_23,
+           left_on = ['Country'],
+           right_on = ['country_name'],
+           how = 'left')
+    .dropna(subset=['happiness_score'])
+
 )
+
 
 print(happiness_spotify_2023_pd)
 print(happiness_spotify_2023_pd.columns)
@@ -612,6 +626,7 @@ top_happiness_score_spotify_23 = (
   .reset_index(drop = True)    ## No longer need the old index
   
 )
+
 
 print(top_happiness_score_spotify_23)
 print(top_happiness_score_spotify_23.columns)
@@ -647,8 +662,8 @@ sns.heatmap(top_happiness_countries_23_corr,
             annot =True,
             cmap = 'bwr_r',
             cbar_kws = {'label': 'Correlation'},
-            square = True,
-            linewidths = 0.5,
+            square = True, 
+            linewidths = 0.4,
             annot_kws={'size': 6})
 
 ## Rotate x-axis labels
@@ -656,6 +671,9 @@ plt.xticks(rotation = 45, ha = 'right', fontsize = 6)
 
 ## Rotate y-axis labels
 plt.yticks(va = 'center', fontsize = 6)
+
+## Create a title for the heatmap 
+plt.title("Correlations for the Top 10 Happiest Countries")
 
 plt.tight_layout()
 plt.show()
@@ -713,7 +731,7 @@ sns.heatmap(bot_happiness_countries_23_corr,
             cmap = 'bwr_r',
             cbar_kws = {'label': 'Correlation'},
             square = True,
-            linewidths = 0.5,
+            linewidths = 0.4,
             annot_kws={'size': 6})
 
 ## Rotate x-axis labels
@@ -721,6 +739,9 @@ plt.xticks(rotation = 45, ha = 'right', fontsize = 6)
 
 ## Rotate y-axis labels
 plt.yticks(va = 'center', fontsize = 6)
+
+## Create a title for the heatmap 
+plt.title("Correlations for the Bottom 10 Happiest Countries")
 
 plt.tight_layout()
 plt.show()
@@ -734,6 +755,8 @@ Since 2025 Happiness Report is not available yet, we will compare the average of
 
 ```{python}
 
+## Filter New Zealand's data from the global 2023 averages
+## Add a 'year' column as an identifier 
 new_zealand_2023 = (
   spotify_global_2023_avg
   .query("Country == 'New Zealand'")
@@ -748,7 +771,7 @@ print(new_zealand_2023.columns)
 
 ```{python}
 
-## Concat 2023 and 2025 New Zealand data into one table
+## Combine 2023 and 2025 New Zealand data into a single table
 new_zealand_spotify_combined = pd.concat([new_zealand_2023, new_zealand_2025_avg])
 
 
@@ -767,6 +790,8 @@ print(new_zealand_spotify_combined_melt)
 
 ```{python}
 
+## Filter South Korea's data from the global 2023 averages
+## Add a 'year' column as an identifier 
 south_korea_2023 = (
   spotify_global_2023_avg
   .query("Country == 'South Korea'")
@@ -781,7 +806,7 @@ print(south_korea_2023.columns)
 
 ```{python}
 
-## Concat 2023 and 2025 New Zealand data into one table
+## Concat 2023 and 2025 South Korea data into one table
 south_korea_spotify_combined = pd.concat([south_korea_2023, south_korea_2025_avg])
 
 
@@ -800,10 +825,8 @@ print(south_korea_spotify_combined_melt)
 
 ```{python}
 
-```
-
-```{python}
-
+## Filter USA data from the global 2023 averages
+## Add a 'year' column as an identifier 
 usa_2023 = (
   spotify_global_2023_avg
   .query("Country == 'United States'")
