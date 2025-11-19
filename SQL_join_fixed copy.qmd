@@ -18,6 +18,8 @@ However, in SQL, the `Artist and Title` field was being split at every hyphen. F
 
 To fix this, I reformatted the New Zealand dataset using the example from this Stack Overflow (<https://stackoverflow.com/questions/4036036/php-substr-after-a-certain-char-a-substr-strpos-elegant-solution>). After changing the code to fit our data, `new_zealand_25_matched_sql_cleaned` returned 104 rows, consistent with the Tidyverse and Pandas outputs.
 
+(<w3resource.com/PostgreSQL/strpos-function.php>)
+
 Also, for the Kworb datasets, we need to apply `STRING_SPLIT` twice: first to separate the artist and title, and then to further split the artist field. This step was missing in my previous Tidyverse and Pandas code, but the most recent versions reflects these changes.
 
 Changing those lines of code should fix the problem #1 and 3 you encountered. I didnt have a chance to apply it to the whole SQL code yet, but the test on the New Zealand dataset appears to match correctly, so I am hoping its going to work for other two countries as well.
