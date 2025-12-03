@@ -1,6 +1,8 @@
 ---
 title: "Final Project"
-format: html
+format: 
+  html:
+    df-print: paged
 editor: visual
 ---
 
@@ -312,7 +314,7 @@ spotify_2025_R <- universal_spotify |>
                              title = str_to_lower(str_trim(title))) |>
                     mutate(artist = word(artists, 1, sep = ",")) |>
                     select(-artists) |>
-                    relocate(artist, .after = title)   
+                    relocate(artist, .after = title)   ## Only need to move the artist column
 
 
 spotify_2025_R
@@ -380,7 +382,7 @@ new_zealand_2025_matched_r
 ## Remove duplicate songs
 ## Drop rows where audio features are missing
 new_zealand_2025_matched_r_cleaned <- new_zealand_2025_matched_r |>
-                                        distinct(Artist, Title, .keep_all = TRUE) |> 
+                                        distinct(Artist, Title, .keep_all = TRUE) |>  ## Preserve columns of audio features
                                         drop_na(danceability)
 
 new_zealand_2025_matched_r_cleaned
@@ -422,7 +424,7 @@ south_korea_2025_matched_r
 ## Remove duplicate songs 
 ## Drop rows where audio features are missing
 south_korea_2025_matched_r_cleaned <- south_korea_2025_matched_r |>
-                                        distinct(Artist, Title, .keep_all = TRUE) |> 
+                                        distinct(Artist, Title, .keep_all = TRUE) |>  ## Preserve columns of audio features
                                         drop_na(danceability)
 
 south_korea_2025_matched_r_cleaned
@@ -465,7 +467,7 @@ usa_2025_matched_r
 ## Remove duplicate songs
 ## Drop rows where audio features are missing
 usa_2025_matched_r_cleaned <- usa_2025_matched_r |>
-                                        distinct(Artist, Title, .keep_all = TRUE) |> 
+                                        distinct(Artist, Title, .keep_all = TRUE) |>  ## Preserve columns of audio features
                                         drop_na(danceability)
 
 usa_2025_matched_r_cleaned
@@ -561,9 +563,9 @@ ggplot(data = top_happiness_countries_23_corr_melt, aes(x = Var1, y = Var2, fill
                        mid = "white", 
                        midpoint = 0, 
                        limit = c(-1,1), 
-                       space = "Lab",   
+                       space = "Lab",   ## Color space in which to calculate gradient
                        name = "Correlation") +
-  theme_minimal() +    
+  theme_minimal() +    ## Remove borders and unnecessary tick marks
   theme(axis.text.x = element_text(angle = 45, 
                                    hjust = 1, 
                                    size = 9)) +
@@ -613,9 +615,9 @@ ggplot(data = bot_happiness_countries_23_corr_melt, aes(x = Var1, y = Var2, fill
                        mid = "white", 
                        midpoint = 0, 
                        limit = c(-1,1), 
-                       space = "Lab",   
+                       space = "Lab",   ## Color space in which to calculate gradient
                        name = "Correlation") +
-  theme_minimal() +    
+  theme_minimal() +    ## Remove borders and unnecessary tick marks
   theme(axis.text.x = element_text(angle = 45, 
                                    hjust = 1, 
                                    size = 9)) +
