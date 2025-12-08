@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>data-wrangling-final-project---excel</title>
+<style class="anchorjs"></style><style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="FINAL%20data-wrangling-final-project---excel_files/clipboard.min.js"></script>
+<script src="FINAL%20data-wrangling-final-project---excel_files/quarto.js" type="module"></script>
+<script src="FINAL%20data-wrangling-final-project---excel_files/tabsets.js" type="module"></script>
+<script src="FINAL%20data-wrangling-final-project---excel_files/popper.min.js"></script>
+<script src="FINAL%20data-wrangling-final-project---excel_files/tippy.umd.min.js"></script>
+<script src="FINAL%20data-wrangling-final-project---excel_files/anchor.min.js"></script>
+<link href="FINAL%20data-wrangling-final-project---excel_files/tippy.css" rel="stylesheet">
+<link href="FINAL%20data-wrangling-final-project---excel_files/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="FINAL%20data-wrangling-final-project---excel_files/bootstrap.min.js"></script>
+<link href="FINAL%20data-wrangling-final-project---excel_files/bootstrap-icons.css" rel="stylesheet">
+<link href="FINAL%20data-wrangling-final-project---excel_files/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+<style>.ansi-display{font-family:monospace;white-space:pre-wrap;--ansiBlack: #000000;--ansiRed: #cd3131;--ansiGreen: #00BC00;--ansiYellow: #949800;--ansiBlue: #0451a5;--ansiMagenta: #bc05bc;--ansiCyan: #0598bc;--ansiWhite: #555555;--ansiBrightBlack: #666666;--ansiBrightRed: #cd3131;--ansiBrightGreen: #14CE14;--ansiBrightYellow: #b5ba00;--ansiBrightBlue: #0451a5;--ansiBrightMagenta: #bc05bc;--ansiBrightCyan: #0598bc;--ansiBrightWhite: #a5a5a5}.dark-mode .ansi-display{--ansiBlack: #000000;--ansiRed: #cd3131;--ansiGreen: #0DBC79;--ansiYellow: #e5e510;--ansiBlue: #2472c8;--ansiMagenta: #bc3fbc;--ansiCyan: #11a8cd;--ansiWhite: #e5e5e5;--ansiBrightBlack: #666666;--ansiBrightRed: #f14c4c;--ansiBrightGreen: #23d18b;--ansiBrightYellow: #f5f543;--ansiBrightBlue: #3b8eea;--ansiBrightMagenta: #d670d6;--ansiBrightCyan: #29b8db;--ansiBrightWhite: #e5e5e5}@keyframes ansi-displaly-run-blink{50%{opacity:0}}.fui-FluentProvider h2{border-bottom:none;padding-bottom:0}</style><style data-make-styles-bucket="d" data-priority="0"></style><style id="fui-FluentProviderr0"></style></head>
+
+<body class="fullcontent quarto-light" data-tabster="{&quot;root&quot;:{}}">
+
+<i tabindex="0" role="none" data-tabster-dummy="" aria-hidden="true" style="position: fixed; height: 1px; width: 1px; opacity: 0.001; z-index: -1; content-visibility: hidden; top: 0px; left: 0px;"></i><div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<pre class="{yaml}"><code>format:
+  html:
+    embed-resources: true</code></pre>
+<section id="load-world-happiness-report-2023" class="level2">
+<h2 class="anchored" data-anchor-id="load-world-happiness-report-2023">Load World Happiness Report 2023<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#load-world-happiness-report-2023" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<p>= Csv.Document(File.Contents(“C:Files.csv”),[Delimiter=“,”, Columns=19, Encoding=1252, QuoteStyle=QuoteStyle.None])</p>
+<section id="removed-columns-not-used-in-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="removed-columns-not-used-in-analysis">Removed columns not used in analysis<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#removed-columns-not-used-in-analysis" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Changed Type”,{“Standard error of ladder 
+score”, “upperwhisker”, “lowerwhisker”, “Perceptions of corruption”, 
+“Ladder score in Dystopia”, “Explained by: Log GDP per capita”, 
+“Explained by: Social support”, “Explained by: Healthy life expectancy”,
+ “Explained by: Freedom to make life choices”, “Explained by: 
+Generosity”, “Explained by: Perceptions of corruption”, “Dystopia + 
+residual”})</p>
+</section>
+<section id="renamed-columns-for-more-intuitive-understanding" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-columns-for-more-intuitive-understanding">Renamed columns for more intuitive understanding<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-columns-for-more-intuitive-understanding" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Removed columns not used in 
+analysis”,{{“Country name”, “country_name”}, {“Ladder score”, 
+“happiness_score”}, {“Logged GDP per capita”, “gdp_wellbeing”}, {“Social
+ support”, “social_support”}, {“Healthy life expectancy”, “life_exp”}, 
+{“Freedom to make life choices”, “freedom”}, {“Generosity”, 
+“generosity”}})</p>
+<p>Cleaned table:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/WHR%20clean.png" class="img-fluid"></p>
+<p>Full pipeline:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/whr%20pipeline.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="import-dataset-2---spotify-global-top-50-song-data-kaggle" class="level2">
+<h2 class="anchored" data-anchor-id="import-dataset-2---spotify-global-top-50-song-data-kaggle">Import Dataset 2 - Spotify Global Top 50 Song Data (Kaggle)<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#import-dataset-2---spotify-global-top-50-song-data-kaggle" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<p>= Table.ReorderColumns(#“Renamed Columns2”,{“country”, “title”, “artist”, “danceability”, “energy”, “loudness”, “tempo”})</p>
+<p>###Removed columns not used in analysis</p>
+<p>= Table.RemoveColumns(#“Changed Type”,{“spotify_id”, “daily_rank”, 
+“daily_movement”, “weekly_movement”, “snapshot_date”, “popularity”, 
+“is_explicit”, “duration_ms”, “album_name”, “album_release_date”, “key”,
+ “mode”, “speechiness”, “acousticness”, “instrumentalness”, “liveness”, 
+“time_signature”})</p>
+<section id="renamed-columns-for-matching" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-columns-for-matching">Renamed columns for matching<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-columns-for-matching" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Removed Columns”,{{“name”, “title”}})</p>
+</section>
+<section id="split-artist-column-by-delimiter" class="level3">
+<h3 class="anchored" data-anchor-id="split-artist-column-by-delimiter">Split artist column by ‘,’ delimiter<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-artist-column-by-delimiter" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Renamed Columns”, “artists”, 
+Splitter.SplitTextByEachDelimiter({“,”}, QuoteStyle.Csv, false), 
+{“artists.1”, “artists.2”})</p>
+</section>
+<section id="removed-additional-artist-columns" class="level3">
+<h3 class="anchored" data-anchor-id="removed-additional-artist-columns">Removed additional artist columns<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#removed-additional-artist-columns" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Renamed Columns”, “artists”, 
+Splitter.SplitTextByEachDelimiter({“,”}, QuoteStyle.Csv, false), 
+{“artists.1”, “artists.2”})</p>
+</section>
+<section id="renamed-remaining-artist-column" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-remaining-artist-column">Renamed remaining artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-remaining-artist-column" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Filtered Rows2”,{{“artists.1”, “artist”}})</p>
+<p>Cleaned Dataset:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/clean%20spotify%2023.png" class="img-fluid"></p>
+<p>Pipeline:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/spotify%2023%20pipeline.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="import-wrangle-dataset-3---world-data-2023-kaggle" class="level2">
+<h2 class="anchored" data-anchor-id="import-wrangle-dataset-3---world-data-2023-kaggle">Import &amp; Wrangle Dataset 3 - World Data 2023 (Kaggle)<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#import-wrangle-dataset-3---world-data-2023-kaggle" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<p>= Csv.Document(File.Contents(“C:Files_data_2023.csv”),[Delimiter=“,”, Columns=35, Encoding=65001, QuoteStyle=QuoteStyle.Csv])</p>
+<section id="removed-all-columns-except-abbreviation-and-country" class="level3">
+<h3 class="anchored" data-anchor-id="removed-all-columns-except-abbreviation-and-country">Removed all columns except Abbreviation and Country<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#removed-all-columns-except-abbreviation-and-country" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Changed Type”,{“Density#(lf)(P/Km2)”, 
+“Agricultural Land( %)”, “Land Area(Km2)”, “Armed Forces size”, “Birth 
+Rate”, “Calling Code”, “Capital/Major City”, “Co2-Emissions”, “CPI”, 
+“CPI Change (%)”, “Currency-Code”, “Fertility Rate”, “Forested Area 
+(%)”, “Gasoline Price”, “GDP”, “Gross primary education enrollment (%)”,
+ “Gross tertiary education enrollment (%)”, “Infant mortality”, “Largest
+ city”, “Life expectancy”, “Maternal mortality ratio”, “Minimum wage”, 
+“Official language”, “Out of pocket health expenditure”, “Physicians per
+ thousand”, “Population”, “Population: Labor force participation (%)”, 
+“Tax revenue (%)”, “Total tax rate”, “Unemployment rate”, 
+“Urban_population”, “Latitude”, “Longitude”})</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/clean%20world%20data.png" class="img-fluid"></p>
+<p>Pipeline:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/world%20data%20pipeline.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="import-wrangle-dataset-4---weekly-charts-of-october-16-2025-kworb" class="level2">
+<h2 class="anchored" data-anchor-id="import-wrangle-dataset-4---weekly-charts-of-october-16-2025-kworb">Import &amp; Wrangle Dataset 4 - Weekly Charts of October 16, 2025 (Kworb)<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#import-wrangle-dataset-4---weekly-charts-of-october-16-2025-kworb" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<section id="new-zealand-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="new-zealand-dataset">4.1 New Zealand Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#new-zealand-dataset" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= 
+Csv.Document(File.Contents(“C:Files\10_16_25_new_zealand.csv”),
+[Delimiter=“,”, Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.None])</p>
+</section>
+<section id="kept-only-artist-and-title" class="level3">
+<h3 class="anchored" data-anchor-id="kept-only-artist-and-title">Kept only ‘Artist and Title’<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#kept-only-artist-and-title" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Changed Type”,{“Pos”, “P+”, “Wks”, “Pk”, “(x?)”, “Streams”, “Streams+”, “Total”})</p>
+</section>
+<section id="split-by---delimiter" class="level3">
+<h3 class="anchored" data-anchor-id="split-by---delimiter">Split by ‘-’ Delimiter<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-by---delimiter" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Kept only”“Artist and Title”““,”Artist and 
+Title”, Splitter.SplitTextByEachDelimiter({” - “}, QuoteStyle.Csv, 
+false), {”Artist and Title.1”, “Artist and Title.2”})</p>
+</section>
+<section id="renamed-split-columns" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-split-columns">Renamed split columns<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-split-columns" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Changed Type1”,{{“Artist and Title.1”, “artist”}, {“Artist and Title.2”, “title”}})</p>
+</section>
+<section id="lowercased-columns-for-more-accurate-matching" class="level3">
+<h3 class="anchored" data-anchor-id="lowercased-columns-for-more-accurate-matching">Lowercased columns for more accurate matching<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#lowercased-columns-for-more-accurate-matching" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.TransformColumns(#“Renamed Columns”,{{“artist”, Text.Lower, type text}, {“title”, Text.Lower, type text}})</p>
+</section>
+<section id="split-column-by-for-matching-to-spotify-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="split-column-by-for-matching-to-spotify-datasets">Split column by ‘,’ for matching to Spotify datasets<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-column-by-for-matching-to-spotify-datasets" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Lowercased Text”, “artist”, 
+Splitter.SplitTextByEachDelimiter({“,”}, QuoteStyle.Csv, false), 
+{“artist.1”, “artist.2”})</p>
+</section>
+<section id="removed-split-artist-column" class="level3">
+<h3 class="anchored" data-anchor-id="removed-split-artist-column">Removed split artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#removed-split-artist-column" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Split Column by Delimiter”“,”““,{”artist.2”})</p>
+</section>
+<section id="renamed-remaining-artist-column-1" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-remaining-artist-column-1">Renamed remaining artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-remaining-artist-column-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Removed second artist column”,{{“artist.1”, “artist”}})</p>
+<section id="cleaned-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="cleaned-dataset">Cleaned Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#cleaned-dataset" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/nz%20clean.png" class="img-fluid"></p>
+</section>
+<section id="pipeline" class="level4">
+<h4 class="anchored" data-anchor-id="pipeline">Pipeline<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#pipeline" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/nz%20pipline.png" class="img-fluid"></p>
+</section>
+<section id="pipeline-1" class="level4">
+<h4 class="anchored" data-anchor-id="pipeline-1">Pipeline<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#pipeline-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/nz%20pipline.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="south-korea-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="south-korea-dataset">4.2 South Korea Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#south-korea-dataset" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= 
+Csv.Document(File.Contents(“C:Files\10_16_25_korea.csv”),[Delimiter=“,”,
+ Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.None])</p>
+</section>
+<section id="kept-only-artist-and-title-1" class="level3">
+<h3 class="anchored" data-anchor-id="kept-only-artist-and-title-1">Kept only ‘Artist and Title’<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#kept-only-artist-and-title-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Changed Type”,{“Pos”, “P+”, “Wks”, “Pk”, “(x?)”, “Streams”, “Streams+”, “Total”})</p>
+</section>
+<section id="split-by---delimiter-1" class="level3">
+<h3 class="anchored" data-anchor-id="split-by---delimiter-1">Split by ‘-’ Delimiter<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-by---delimiter-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Kept only”“Artist and Title”““,”Artist and 
+Title”, Splitter.SplitTextByEachDelimiter({” - “}, QuoteStyle.Csv, 
+false), {”Artist and Title.1”, “Artist and Title.2”})</p>
+</section>
+<section id="renamed-split-columns-1" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-split-columns-1">Renamed split columns<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-split-columns-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Changed Type1”,{{“Artist and Title.1”, “artist”}, {“Artist and Title.2”, “title”}})</p>
+</section>
+<section id="lowercased-columns-for-more-accurate-matching-1" class="level3">
+<h3 class="anchored" data-anchor-id="lowercased-columns-for-more-accurate-matching-1">Lowercased columns for more accurate matching<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#lowercased-columns-for-more-accurate-matching-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.TransformColumns(#“Renamed Columns”,{{“artist”, Text.Lower, type text}, {“title”, Text.Lower, type text}})</p>
+</section>
+<section id="split-column-by-for-matching-to-spotify-datasets-1" class="level3">
+<h3 class="anchored" data-anchor-id="split-column-by-for-matching-to-spotify-datasets-1">Split column by ‘,’ for matching to Spotify datasets<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-column-by-for-matching-to-spotify-datasets-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Lowercased Text”, “artist”, 
+Splitter.SplitTextByEachDelimiter({“,”}, QuoteStyle.Csv, false), 
+{“artist.1”, “artist.2”})</p>
+</section>
+<section id="removed-split-artist-column-1" class="level3">
+<h3 class="anchored" data-anchor-id="removed-split-artist-column-1">Removed split artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#removed-split-artist-column-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Split Column by Delimiter”“,”““,{”artist.2”})</p>
+</section>
+<section id="renamed-remaining-artist-column-2" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-remaining-artist-column-2">Renamed remaining artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-remaining-artist-column-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Removed second artist column”,{{“artist.1”, “artist”}})</p>
+<section id="cleaned-dataset-1" class="level4">
+<h4 class="anchored" data-anchor-id="cleaned-dataset-1">Cleaned Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#cleaned-dataset-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/korea%20clean.png" class="img-fluid"></p>
+</section>
+<section id="pipeline-2" class="level4">
+<h4 class="anchored" data-anchor-id="pipeline-2">Pipeline<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#pipeline-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/korea%20pipeline.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="usa-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="usa-dataset">4.3 USA Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#usa-dataset" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Csv.Document(File.Contents(“C:Files\10_16_25_usa.csv”),[Delimiter=“,”, Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.None])</p>
+</section>
+<section id="kept-only-artist-and-title-2" class="level3">
+<h3 class="anchored" data-anchor-id="kept-only-artist-and-title-2">Kept only ‘Artist and Title’<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#kept-only-artist-and-title-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Changed Type”,{“Pos”, “P+”, “Wks”, “Pk”, “(x?)”, “Streams”, “Streams+”, “Total”})</p>
+</section>
+<section id="split-by---delimiter-2" class="level3">
+<h3 class="anchored" data-anchor-id="split-by---delimiter-2">Split by ‘-’ Delimiter<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-by---delimiter-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Kept only”“Artist and Title”““,”Artist and 
+Title”, Splitter.SplitTextByEachDelimiter({” - “}, QuoteStyle.Csv, 
+false), {”Artist and Title.1”, “Artist and Title.2”})</p>
+</section>
+<section id="renamed-split-columns-2" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-split-columns-2">Renamed split columns<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-split-columns-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Changed Type1”,{{“Artist and Title.1”, “artist”}, {“Artist and Title.2”, “title”}})</p>
+</section>
+<section id="lowercased-columns-for-more-accurate-matching-2" class="level3">
+<h3 class="anchored" data-anchor-id="lowercased-columns-for-more-accurate-matching-2">Lowercased columns for more accurate matching<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#lowercased-columns-for-more-accurate-matching-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.TransformColumns(#“Renamed Columns”,{{“artist”, Text.Lower, type text}, {“title”, Text.Lower, type text}})</p>
+</section>
+<section id="split-column-by-for-matching-to-spotify-datasets-2" class="level3">
+<h3 class="anchored" data-anchor-id="split-column-by-for-matching-to-spotify-datasets-2">Split column by ‘,’ for matching to Spotify datasets<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-column-by-for-matching-to-spotify-datasets-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Lowercased Text”, “artist”, 
+Splitter.SplitTextByEachDelimiter({“,”}, QuoteStyle.Csv, false), 
+{“artist.1”, “artist.2”})</p>
+</section>
+<section id="removed-split-artist-column-2" class="level3">
+<h3 class="anchored" data-anchor-id="removed-split-artist-column-2">Removed split artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#removed-split-artist-column-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RemoveColumns(#“Split Column by Delimiter”“,”““,{”artist.2”})</p>
+</section>
+<section id="renamed-remaining-artist-column-3" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-remaining-artist-column-3">Renamed remaining artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-remaining-artist-column-3" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Removed second artist column”,{{“artist.1”, “artist”}})</p>
+<section id="cleaned-dataset-2" class="level4">
+<h4 class="anchored" data-anchor-id="cleaned-dataset-2">Cleaned Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#cleaned-dataset-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/usa%20clean.png" class="img-fluid"></p>
+</section>
+<section id="pipeline-3" class="level4">
+<h4 class="anchored" data-anchor-id="pipeline-3">Pipeline<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#pipeline-3" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/usa%20pipeline.png" class="img-fluid"></p>
+</section>
+</section>
+</section>
+<section id="import-dataset-5---spotify-global-top-50-song-data-2025-kaggle" class="level2">
+<h2 class="anchored" data-anchor-id="import-dataset-5---spotify-global-top-50-song-data-2025-kaggle">Import Dataset 5 - Spotify Global Top 50 Song Data 2025 (Kaggle)<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#import-dataset-5---spotify-global-top-50-song-data-2025-kaggle" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<p>= Table.ReorderColumns(#“Renamed Columns2”,{“country”, “title”, “artist”, “danceability”, “energy”, “loudness”, “tempo”})</p>
+<p>###Removed columns not used in analysis</p>
+<p>= Table.RemoveColumns(#“Changed Type”,{“spotify_id”, “daily_rank”, 
+“daily_movement”, “weekly_movement”, “snapshot_date”, “popularity”, 
+“is_explicit”, “duration_ms”, “album_name”, “album_release_date”, “key”,
+ “mode”, “speechiness”, “acousticness”, “instrumentalness”, “liveness”, 
+“time_signature”})</p>
+<section id="renamed-columns-for-matching-1" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-columns-for-matching-1">Renamed columns for matching<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-columns-for-matching-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Removed Columns”,{{“name”, “title”}})</p>
+</section>
+<section id="split-artist-column-by-delimiter-1" class="level3">
+<h3 class="anchored" data-anchor-id="split-artist-column-by-delimiter-1">Split artist column by ‘,’ delimiter<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#split-artist-column-by-delimiter-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Renamed Columns”, “artists”, 
+Splitter.SplitTextByEachDelimiter({“,”}, QuoteStyle.Csv, false), 
+{“artists.1”, “artists.2”})</p>
+</section>
+<section id="removed-additional-artist-columns-1" class="level3">
+<h3 class="anchored" data-anchor-id="removed-additional-artist-columns-1">Removed additional artist columns<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#removed-additional-artist-columns-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.SplitColumn(#“Renamed Columns”, “artists”, 
+Splitter.SplitTextByEachDelimiter({“,”}, QuoteStyle.Csv, false), 
+{“artists.1”, “artists.2”})</p>
+</section>
+<section id="renamed-remaining-artist-column-4" class="level3">
+<h3 class="anchored" data-anchor-id="renamed-remaining-artist-column-4">Renamed remaining artist column<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#renamed-remaining-artist-column-4" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>= Table.RenameColumns(#“Filtered Rows2”,{{“artists.1”, “artist”}})</p>
+<p>Cleaned Dataset:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/spotify%2025%20clean.png" class="img-fluid"></p>
+<p>Pipeline</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/spotify%2025%20pipeline.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"><a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#section" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+</section>
+<section id="combine-dataset-2-and-3" class="level2">
+<h2 class="anchored" data-anchor-id="combine-dataset-2-and-3">Combine dataset 2 and 3<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#combine-dataset-2-and-3" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<section id="replace-country-abbreviation-with-its-full-name-match-spotifys-country-abbreviation-with-abbreviation-tables-abbreviation" class="level4">
+<h4 class="anchored" data-anchor-id="replace-country-abbreviation-with-its-full-name-match-spotifys-country-abbreviation-with-abbreviation-tables-abbreviation">Replace country abbreviation with its full name; Match spotify’s country abbreviation with abbreviation table’s abbreviation<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#replace-country-abbreviation-with-its-full-name-match-spotifys-country-abbreviation-with-abbreviation-tables-abbreviation" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.NestedJoin(#“Renamed Split Columns”, {“country”}, 
+world_data_2023, {“abbreviation”}, “world_data_2023”, 
+JoinKind.LeftOuter)</p>
+</section>
+<section id="remove-any-unmatched-rows" class="level4">
+<h4 class="anchored" data-anchor-id="remove-any-unmatched-rows">Remove any unmatched rows<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#remove-any-unmatched-rows" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.SelectRows(#“Expanded world_data_2023”, each 
+[world_data_2023.country] &lt;&gt; null and [world_data_2023.country] 
+&lt;&gt; ““)</p>
+</section>
+<section id="put-country-column-first" class="level4">
+<h4 class="anchored" data-anchor-id="put-country-column-first">Put country column first<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#put-country-column-first" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.ReorderColumns(#“Renamed Columns2”,{“country”, “title”, “artist”, “danceability”, “energy”, “loudness”, “tempo”})</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/matched%20country%20and%20spotify.png" class="img-fluid"></p>
+</section>
+<section id="aggregate-danceability-energy-loudness-liveness-valence-and-tempo-by-country-for-2023-spotify-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="aggregate-danceability-energy-loudness-liveness-valence-and-tempo-by-country-for-2023-spotify-dataset">Aggregate danceability, energy, loudness, liveness, valence, and tempo by Country for 2023 Spotify Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#aggregate-danceability-energy-loudness-liveness-valence-and-tempo-by-country-for-2023-spotify-dataset" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+</section>
+<section id="calculate-averages-of-spotify_global_2023_matched-dataset-by-country" class="level4">
+<h4 class="anchored" data-anchor-id="calculate-averages-of-spotify_global_2023_matched-dataset-by-country">Calculate averages of spotify_global_2023_matched dataset by Country<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#calculate-averages-of-spotify_global_2023_matched-dataset-by-country" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.Group(#“Reordered Columns”, {“country”}, 
+{{“danceability_avg”, each List.Average([danceability]), type nullable 
+number}, {“energy_avg”, each List.Average([energy]), type nullable 
+number}}, {“valence_avg”, each List.Average([valence]), type nullable 
+number}}, {“loudness_avg”, each List.Average([loudness]), type nullable 
+number}}, {“tempo_avg”, each List.Average([tempo]), type nullable 
+number}})</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/country%20averages.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="join-dataset-5-to-each-countrys-dataset-for-2025-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="join-dataset-5-to-each-countrys-dataset-for-2025-analysis">Join Dataset 5 to Each Country’s Dataset for 2025 Analysis<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#join-dataset-5-to-each-countrys-dataset-for-2025-analysis" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<section id="new-zealand-dataset-1" class="level3">
+<h3 class="anchored" data-anchor-id="new-zealand-dataset-1">New Zealand Dataset<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#new-zealand-dataset-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<section id="join-new-zealand-dataframe-and-updated-spotify-dataframe" class="level4">
+<h4 class="anchored" data-anchor-id="join-new-zealand-dataframe-and-updated-spotify-dataframe">Join New Zealand dataframe and updated Spotify dataframe<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#join-new-zealand-dataframe-and-updated-spotify-dataframe" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+</section>
+<section id="left-join-to-keep-all-the-rows-of-left-dataframe" class="level4">
+<h4 class="anchored" data-anchor-id="left-join-to-keep-all-the-rows-of-left-dataframe">Left join to keep all the rows of left dataframe<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#left-join-to-keep-all-the-rows-of-left-dataframe" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.NestedJoin(#“Renamed split artist column”, {“artist”, 
+“title”}, universal_top_spotify_songs_25, {“artist”, “title”}, 
+“universal_top_spotify_songs_25”, JoinKind.LeftOuter)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/nz%20joined.png" class="img-fluid"></p>
+</section>
+<section id="calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison" class="level4">
+<h4 class="anchored" data-anchor-id="calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison">Calculate average for each column, will be used later for 2023 and 2025 comparison<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>Average functions used in output table in Excel</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/nz%20avg.png" class="img-fluid"></p>
+</section>
+<section id="join-korea-dataframe-and-updated-spotify-dataframe" class="level4">
+<h4 class="anchored" data-anchor-id="join-korea-dataframe-and-updated-spotify-dataframe">Join Korea dataframe and updated Spotify dataframe<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#join-korea-dataframe-and-updated-spotify-dataframe" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+</section>
+<section id="left-join-to-keep-all-the-rows-of-left-dataframe-1" class="level4">
+<h4 class="anchored" data-anchor-id="left-join-to-keep-all-the-rows-of-left-dataframe-1">Left join to keep all the rows of left dataframe<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#left-join-to-keep-all-the-rows-of-left-dataframe-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.NestedJoin(#“Renamed split artist column”, {“artist”, 
+“title”}, universal_top_spotify_songs_25, {“artist”, “title”}, 
+“universal_top_spotify_songs_25”, JoinKind.LeftOuter)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/korea%20combined.png" class="img-fluid"></p>
+</section>
+<section id="calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison-1" class="level4">
+<h4 class="anchored" data-anchor-id="calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison-1">Calculate average for each column, will be used later for 2023 and 2025 comparison<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>Average functions used within output table in Excel:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/korea%20avg%2025.png" class="img-fluid"></p>
+</section>
+<section id="join-usa-dataframe-and-updated-spotify-dataframe" class="level4">
+<h4 class="anchored" data-anchor-id="join-usa-dataframe-and-updated-spotify-dataframe">Join USA dataframe and updated Spotify dataframe<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#join-usa-dataframe-and-updated-spotify-dataframe" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+</section>
+<section id="left-join-to-keep-all-the-rows-of-left-dataframe-2" class="level4">
+<h4 class="anchored" data-anchor-id="left-join-to-keep-all-the-rows-of-left-dataframe-2">Left join to keep all the rows of left dataframe<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#left-join-to-keep-all-the-rows-of-left-dataframe-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.NestedJoin(#“Renamed split artist column”, {“artist”, 
+“title”}, universal_top_spotify_songs_25, {“artist”, “title”}, 
+“universal_top_spotify_songs_25”, JoinKind.LeftOuter)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/usa%20combined.png" class="img-fluid"></p>
+</section>
+<section id="calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison-2" class="level4">
+<h4 class="anchored" data-anchor-id="calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison-2">Calculate average for each column, will be used later for 2023 and 2025 comparison<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#calculate-average-for-each-column-will-be-used-later-for-2023-and-2025-comparison-2" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>Avg calculated using functions on output table in Excel:</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/usa%20avg.png" class="img-fluid"></p>
+</section>
+</section>
+</section>
+<section id="correlation-studies" class="level2">
+<h2 class="anchored" data-anchor-id="correlation-studies">Correlation Studies<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#correlation-studies" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h2>
+<section id="combine-aggregated-spotify-dataset-with-happiness-report" class="level4">
+<h4 class="anchored" data-anchor-id="combine-aggregated-spotify-dataset-with-happiness-report">Combine aggregated Spotify dataset with happiness report<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#combine-aggregated-spotify-dataset-with-happiness-report" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.NestedJoin(#“Reordered Columns”, {“country”}, whr, {“country_name”}, “whr”, JoinKind.LeftOuter)</p>
+</section>
+<section id="drop-any-countries-with-no-happiness-score" class="level4">
+<h4 class="anchored" data-anchor-id="drop-any-countries-with-no-happiness-score">Drop any countries with no happiness score<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#drop-any-countries-with-no-happiness-score" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.SelectRows(#“Renamed Columns1”, each [happiness_score] &lt;&gt; null and [happiness_score] &lt;&gt; ““)</p>
+</section>
+<section id="remove-country-column-for-correlation-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="remove-country-column-for-correlation-analysis">Remove Country column for correlation analysis<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#remove-country-column-for-correlation-analysis" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.SelectRows(#“Filtered Rows3”, each [country] &lt;&gt; null and [country] &lt;&gt; ““)</p>
+<p>This was outputted to table “Correlation Study.”</p>
+</section>
+<section id="calculate-matrix-in-excel" class="level4">
+<h4 class="anchored" data-anchor-id="calculate-matrix-in-excel">Calculate Matrix in Excel<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#calculate-matrix-in-excel" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>Formulas repeated for Correlation Study, e.g., “=CORREL(‘Correlation 
+Study’!A2:A100, ‘Correlation Study’!A2:A100)”, =CORREL(‘Correlation 
+Study’!A2:A100, ‘Correlation Study’!B2:B100)“, etc.</p>
+<p>Conditional formatting was used to create heatmap.</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/matrix%20heatmap.png" class="img-fluid"></p>
+</section>
+<section id="melt-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="melt-matrix">Melt matrix<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#melt-matrix" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.UnpivotOtherColumns(#“Changed Type”, {“Column1”}, “Attribute”, “Value”)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/melted%20matrix.png" class="img-fluid"></p>
+</section>
+<section id="analyzing-correlations-in-the-top-10-happiness-score-countries" class="level3">
+<h3 class="anchored" data-anchor-id="analyzing-correlations-in-the-top-10-happiness-score-countries">Analyzing Correlations in the Top 10 Happiness Score Countries<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#analyzing-correlations-in-the-top-10-happiness-score-countries" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<section id="pull-top-10-countries" class="level4">
+<h4 class="anchored" data-anchor-id="pull-top-10-countries">Pull Top 10 Countries<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#pull-top-10-countries" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.Sort(#“Renamed Columns”,{{“ladder_score”, Order.Descending}})</p>
+</section>
+<section id="remove-country-names" class="level4">
+<h4 class="anchored" data-anchor-id="remove-country-names">Remove Country names<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#remove-country-names" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.SelectRows(#“Filtered Rows3”, each [country] &lt;&gt; null and [country] &lt;&gt; ““)</p>
+<p>Matrix calculated using CORREL function in Excel with indexing to repeat according to columns.</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/top%20happiness%20matrix.png" class="img-fluid"></p>
+<p>= Table.UnpivotOtherColumns(#“Changed Type”, {“Column1”}, “Attribute”, “Value”)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/top%20happiness%20melted%20matrix.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="analyzing-correlations-in-the-bottom-10-happiness-score-countries" class="level3">
+<h3 class="anchored" data-anchor-id="analyzing-correlations-in-the-bottom-10-happiness-score-countries">Analyzing Correlations in the Bottom 10 Happiness Score Countries<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#analyzing-correlations-in-the-bottom-10-happiness-score-countries" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<section id="pull-top-10-countries-1" class="level4">
+<h4 class="anchored" data-anchor-id="pull-top-10-countries-1">Pull Top 10 Countries<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#pull-top-10-countries-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.Sort(#“Renamed Columns”,{{“ladder_score”, Order.Descending}})</p>
+</section>
+<section id="remove-country-names-1" class="level4">
+<h4 class="anchored" data-anchor-id="remove-country-names-1">Remove Country names<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#remove-country-names-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.SelectRows(#“Filtered Rows3”, each [country] &lt;&gt; null and [country] &lt;&gt; ““)</p>
+<p>Matrix calculated using CORREL function in Excel with indexing to repeat according to columns.</p>
+</section>
+<section id="section-1" class="level4">
+<h4 class="anchored" data-anchor-id="section-1"><img src="FINAL%20data-wrangling-final-project---excel_files/bottom%20happiness%20matrix.png" class="img-fluid"><a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#section-1" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.UnpivotOtherColumns(#“Changed Type”, {“Column1”}, “Attribute”, “Value”)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/bottom%20happiness%20melted%20matrix.png" class="img-fluid"></p>
+</section>
+<section id="since-2025-happiness-report-is-not-available-yet-we-will-compare-the-average-of-music-analytic-components-and-note-if-there-are-any-changes." class="level4">
+<h4 class="anchored" data-anchor-id="since-2025-happiness-report-is-not-available-yet-we-will-compare-the-average-of-music-analytic-components-and-note-if-there-are-any-changes.">Since
+ 2025 Happiness Report is not available yet, we will compare the average
+ of music analytic components and note if there are any changes.<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#since-2025-happiness-report-is-not-available-yet-we-will-compare-the-average-of-music-analytic-components-and-note-if-there-are-any-changes." style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+</section>
+</section>
+<section id="new-zealand" class="level3">
+<h3 class="anchored" data-anchor-id="new-zealand">New Zealand<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#new-zealand" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>Sheet generated by copy pasting average values calculated by Group By above with Calculated 2025 averages.</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/nz%20combined.png" class="img-fluid"></p>
+<section id="melt-combined-nz-table" class="level4">
+<h4 class="anchored" data-anchor-id="melt-combined-nz-table">Melt combined NZ table<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#melt-combined-nz-table" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.UnpivotOtherColumns(#“Changed Type”, {“Column1”}, “Attribute”, “Value”)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/nz%20combined%20melt.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="south-korea" class="level3">
+<h3 class="anchored" data-anchor-id="south-korea">South Korea<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#south-korea" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>Sheet generated by copy pasting average values calculated by Group By above with Calculated 2025 averages.</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/korea%20combined%20spotify.png" class="img-fluid"></p>
+<section id="melt-combined-korea-table" class="level4">
+<h4 class="anchored" data-anchor-id="melt-combined-korea-table">Melt combined Korea table<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#melt-combined-korea-table" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.UnpivotOtherColumns(#“Changed Type”, {“Column1”}, “Attribute”, “Value”)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/kore%20melt.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="usa" class="level3">
+<h3 class="anchored" data-anchor-id="usa">USA<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#usa" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h3>
+<p>Sheet generated by copy pasting average values calculated by Group By above with Calculated 2025 averages.</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/usa%20combined%20spotify.png" class="img-fluid"></p>
+<section id="melt-combined-usa-table" class="level4">
+<h4 class="anchored" data-anchor-id="melt-combined-usa-table">Melt combined USA table<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="#melt-combined-usa-table" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>= Table.UnpivotOtherColumns(#“Changed Type”, {“Column1”}, “Attribute”, “Value”)</p>
+<p><img src="FINAL%20data-wrangling-final-project---excel_files/usa%20melt.png" class="img-fluid"></p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+
+<script>
+  window.backupDefine = window.define;
+  window.define = undefined;
+</script>
+<script type="text/javascript" src="FINAL%20data-wrangling-final-project---excel_files/quarto-preview.js"></script>
+<script>
+  window.define = window.backupDefine;
+  window.backupDefine = undefined;
+</script>
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    window.QuartoPreview.init({
+      origin: "",
+      search: "",
+      inputFile: "C:\Users\User\Documents\Project Files\Data Wrangling Final Project - Excel.qmd",
+      isPresentation: false
+    });
+  })
+</script>
+<div><div dir="ltr" class="fui-FluentProvider fui-FluentProviderr0 ___jdtuxv0 f19n0e5 fxugw4r f1o700av fk6fouc fkhj508 figsok6 f1i3iumi"></div></div><i tabindex="0" role="none" data-tabster-dummy="" aria-hidden="true" style="position: fixed; height: 1px; width: 1px; opacity: 0.001; z-index: -1; content-visibility: hidden; top: 0px; left: 0px;"></i></body></html>
